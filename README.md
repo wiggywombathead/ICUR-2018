@@ -1,6 +1,6 @@
 # ICUR 2018
 My research project for the International Conference for Undergraduate Research
-([ICUR])(https://www.icurportal.com/) 2018.
+([ICUR](https://www.icurportal.com/)) 2018.
 
 ## Title: Cellular Automata and Computational Universality
 
