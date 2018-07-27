@@ -12,8 +12,8 @@ simulation of computer processors, to name a few. They also raise profound
 questions about the nature of our reality, asking whether our universe could be
 one such automaton. This paper provides a discussion into these automata,
 exploring the various power and limitations of a number of specific rule sets,
-covering John Conway's well-known ``Game of Life'' to the more obscure
-``Langton's ant'' and ``Wireworld''. In particular, it explores the notion of
+covering John Conway's well-known "Game of Life" to the more obscure
+"Langton's ant" and "Wireworld". In particular, it explores the notion of
 computational universality, or Turing completeness, an automaton's ability to
 simulate any conceivable computation, and considers their potential in the
 context of solving two specific problems, the Firing Squad Synchronization
