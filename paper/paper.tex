@@ -1,6 +1,7 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
 
 \title{Cellular Automata and Computational Universality}
 
@@ -34,4 +35,30 @@
     visualize and probe further into the nature of the automata highlighted.
 \end{abstract}
 
+\section{Introduction}
+    A cellular automaton is a discrete model of computation which consists of a
+    finite collection of ``cells'', each in one of a finite number of states.
+    The state of each of these cells may evolve over the discrete progression of
+    time in discrete steps, and may do so according to a deterministic set of
+    rules specifying the state to which each cell is to progress, taking into
+    account the states of cells in its neighbourhood. Their inherently discrete
+    nature allows for strong analogies to be made with digital computers, and
+    gifts them the ability to simulate digital processes and the potential to
+    solve problems in this area. 
+    
+    Consider the cellular automaton defined by the simple rule:
+    $$ a_{i}^{t+1} = a_{i-1}^{t} + a_{i+1}^{t} \mod{2} $$
+    For any automaton, in each time step the rule is applied to all cells in the
+    automaton instantaneously and simultaneously. In this case, our set of
+    states is ${0,1}$, and for each cell we look at the cells immediately
+    preceding and succeeding it: if exactly one of them is in state 1, then this
+    cell will be in state 1 in the next time step. Otherwise it will be in state
+    0. 
+
+\section{Examples}
+\section{Applications}
+\section{Computational Universality}
+\section{Firing Squad Synchronization Problem}
+\section{Majority Problem}
+\section{}
 \end{document}
