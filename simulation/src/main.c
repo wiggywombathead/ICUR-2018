@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 
 #include "global.h"
@@ -9,7 +10,9 @@ int max_gens = 48;
 
 void rule_01(struct automaton *ca) {
    
+    /* create new array to compute states without changing current ones */
     int *new = malloc(sizeof(int) * ca->len);
+
     for (int i = 1; i < ca->len-1; i++) {
         new[i] = (ca->cells[i-1] + ca->cells[i+1]) % 2;
     }
@@ -21,6 +24,30 @@ void rule_01(struct automaton *ca) {
 
 }
 
+/*
+void gol(struct automaton *ca) {
+
+    int *new = malloc(sizeof(int) * ca->len * ca->len);
+    for (int i = 0; i < ca->len; i++) {
+        for (int j = 0; j < ca->len; j++) {
+
+            int alive = 0;
+
+            alive += ca->cells[i-1][j-1];
+            alive += ca->cells[i-1][j];
+            alive += ca->cells[i-1][j+1];
+            alive += ca->cells[i][j-1];
+            alive += ca->cells[i][j+1];
+            alive += ca->cells[i+1][j-1];
+            alive += ca->cells[i+1][j];
+            alive += ca->cells[i+1][j+1];
+
+        }
+    }
+
+}
+*/
+
 void render(SDL_Renderer *r, struct automaton *ca) {
 
     /* draw to screen */
@@ -30,6 +57,7 @@ void render(SDL_Renderer *r, struct automaton *ca) {
         } else {
             SDL_SetRenderDrawColor(r, 0, 0, 0, SDL_ALPHA_OPAQUE);
         }
+
         SDL_RenderFillRect(r, &ca->rects[i]);
         ca->rects[i].y += ca->rects[i].h;
     }
@@ -75,9 +103,21 @@ int main() {
 
     int config[] = {
         0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,1,
         0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        1,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
     };
 
     struct automaton *rule1 = init_automaton(

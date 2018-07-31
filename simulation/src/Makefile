@@ -11,9 +11,11 @@ _OBJ = automaton.o main.o
 OBJ = $(patsubst %, $(ODIR)/%, $(_OBJ))
 
 $(ODIR)/%.o: %.c $(DEPS)
+	mkdir -p $(@D)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 run: $(OBJ)
+	mkdir -p $(@D)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 clean:

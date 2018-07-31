@@ -4,7 +4,7 @@
 
 struct automaton *init_automaton(int len, simulate_fn func, int d) {
     struct automaton *ca = malloc(sizeof(struct automaton));
-    ca->cells = calloc(len, sizeof(int));
+    ca->cells = calloc(len * d, sizeof(int));
     
     ca->len = len;
     ca->dimension = d;
