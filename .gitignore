@@ -1,5 +1,12 @@
-references/*
+reference/*
 python_practice/*
+
+# LaTeX rubbish
 .aux
 .log
 .tex
+.bbl
+.bcf
+.blg
+.xml
+.png
