@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <SDL2/SDL.h>
+#include <time.h>
 
 #include "global.h"
 #include "automaton.h"
 
-int max_gens = 48;
+int max_gens = 1024;
 
 void rule_01(struct automaton *ca) {
    
@@ -23,11 +24,10 @@ void rule_01(struct automaton *ca) {
     ca->cells = new;
 
 }
-
 /*
 void gol(struct automaton *ca) {
 
-    int *new = malloc(sizeof(int) * ca->len * ca->len);
+    int *new = malloc(sizeof(int) * ca->len);
     for (int i = 0; i < ca->len; i++) {
         for (int j = 0; j < ca->len; j++) {
 
@@ -81,6 +81,8 @@ int main() {
             WIN_HEIGHT,
             SDL_WINDOW_SHOWN
     );
+    int win_width, win_height;
+    SDL_GetWindowSize(window, &win_width, &win_height);
 
     if (window == NULL) {
         fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
@@ -100,43 +102,17 @@ int main() {
 
     SDL_Event e;
     int is_running = 1;
+    int current_gen = 0;
 
-    int config[] = {
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,1,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        1,1,1,1,1,1,1,1,    1,1,1,1,1,1,1,1,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
+    srand(time(NULL));
+    int config[1024];
+    for (int i = 0; i < 1024; i++) {
+        // config[i] = rand() % 2;
+        if (rand() % 10 == 0)
+            config[i] = ALIVE;
+    }
 
-        1,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,1,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,1
-    };
-
+    printf("%ld\n", sizeof(config)/sizeof(config[0]));
     struct automaton *rule1 = init_automaton(
             sizeof(config) / sizeof(int),
             &rule_01,
@@ -164,17 +140,20 @@ int main() {
             break;
         }
 
+        if (rule1->rects[0].y + rule1->rects[0].h > win_height)
+            continue;
+
         /* render */
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        //SDL_RenderClear(renderer);
 
         render(renderer, rule1);
 
         SDL_RenderPresent(renderer);
         /* update objects */
         rule1->sim(rule1);
+        current_gen++;
         
-        SDL_Delay(10);
+        SDL_Delay(6);
     }
 
     SDL_DestroyRenderer(renderer);
