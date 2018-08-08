@@ -1,12 +1,19 @@
+# Research materials
 reference/*
 python_practice/*
 
+# Build files
+*.o
+run
+
 # LaTeX rubbish
-.aux
-.log
-.tex
-.bbl
-.bcf
-.blg
-.xml
-.png
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.out
+*.tex
+*.xml
+*.jpg
+*.png

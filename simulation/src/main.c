@@ -71,14 +71,11 @@ int main() {
     );
     rule1->cells = config;
 
-    int gol_conf[] = {
-        0,0,0,0,
-        0,1,0,0,
-        0,0,0,0,
-        0,0,0,0
-    };
+    int *gol_conf = calloc(256 * 256, sizeof(int));
+    gol_conf[1] = gol_conf[258] = gol_conf[512] = gol_conf[513] = gol_conf[514] = 1;
+
     struct automaton *conway = init_automaton(
-            sqrt(sizeof(gol_conf) / sizeof(int)),
+            256,
             &gol,
             2
     );
@@ -107,7 +104,7 @@ int main() {
         /* render and update automaton */
         render(renderer, conway);
 
-        SDL_Delay(100);
+        SDL_Delay(50);
         current_gen++;
     }
 

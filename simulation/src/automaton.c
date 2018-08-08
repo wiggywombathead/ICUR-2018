@@ -69,15 +69,6 @@ void gol(struct automaton *ca) {
     int *new = calloc(total_cells, sizeof(int));
     memcpy(new, ca->cells, sizeof(int) * total_cells);
 
-    printf("Current:\n");
-    for (int i = 0; i < ca->len; i++) {
-        for (int  j = 0; j < ca->len; j++) {
-            printf("%d ", ca->cells[i*ca->len+j]);
-        }
-        printf("\n");
-    }
-    printf("----------\nAlive:\n");
-
     for (int i = 0; i < ca->len; i++) {
         for (int  j = 0; j < ca->len; j++) {
 
@@ -99,7 +90,7 @@ void gol(struct automaton *ca) {
             if (j < ca->len-1)
                 alive += ca->cells[curr + 1];
 
-            if (i < ca->len-1 && j < 0)
+            if (i < ca->len-1 && j > 0)
                 alive += ca->cells[curr + ca->len - 1];
 
             if (i < ca->len-1)
@@ -121,10 +112,8 @@ void gol(struct automaton *ca) {
                     new[curr] = ALIVE;
 
             }
-            printf("%d ", alive);
 
         }
-        printf("\n");
     }
 
     ca->cells = new;
