@@ -1,7 +1,7 @@
 CC = gcc
 IDIR = ../include
 ODIR = objs
-LIBS = -lSDL2 -lm
+LIBS = -lSDL2 -lm -pthread
 CFLAGS = -O2 -Wall -g -I$(IDIR)
 
 _DEPS = automaton.h global.h

@@ -119,3 +119,10 @@ void gol(struct automaton *ca) {
     ca->cells = new;
 
 }
+
+void langton(struct automaton *ca) {
+
+    static int ant;
+    int total_cells = (int) pow(ca->length, ca->dimension);
+
+}
