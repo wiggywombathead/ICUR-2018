@@ -15,7 +15,12 @@ pthread_mutex_t mutex;
 
 SDL_Window *window;
 SDL_Renderer *renderer;
-SDL_Event e;
+
+int running = true;
+int paused = false;
+int mode = SIMULATE;    /* enable/disable drawing */
+int paintbrush;         /* the state with which to overwrite cell */
+struct automaton *active;
 
 extern void rule_90(struct automaton *);
 extern void rule_110(struct automaton *);
@@ -23,6 +28,8 @@ extern void gol(struct automaton *);
 extern void wireworld(struct automaton *);
 
 void render(struct automaton *);
+void handle_input(void);
+void print_help(void);
 
 int main() {
 
@@ -60,7 +67,6 @@ int main() {
     }
 
     /* program setup */
-    int running = true;
 
     srand(time(NULL));
 
@@ -89,83 +95,16 @@ int main() {
         gol_conf[33284] = gol_conf[33537] = gol_conf[33538] = gol_conf[33539] =
         gol_conf[33540] = ALIVE;
 
-    // int *ww_conf = calloc(256 * 256, sizeof(int));
-    // for (int i = 0; i < 256*256; i++)
-    //     ww_conf[i] = EMPTY;
-
-    int ww_conf[] = {
-        0,0,5,5,5,4,3,5,5,5,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,5,0,0,0,0,0,0,0,0,5,4,    3,5,5,5,0,0,0,0,0,0,0,0,
-        0,0,5,5,5,5,5,5,3,4,0,0,    0,0,0,0,5,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,5,5,5,5,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,3,0,0,3,5,5,5,5,5,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,4,4,4,3,0,0,0,0,0,
-        0,0,5,5,5,4,3,5,5,5,0,0,    0,0,0,0,5,0,0,0,0,0,0,0,
-        0,5,0,0,0,0,0,0,0,0,5,5,    5,5,5,5,0,0,0,0,0,0,0,0,
-        0,0,3,4,5,5,5,5,5,5,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,    0,0,0,0,0,0,0,0,0,0,0,0,
-    };
+    int *ww_conf = calloc(64 * 64, sizeof(int));
+    for (int i = 0; i < 64*64; i++)
+        ww_conf[i] = EMPTY;
 
     struct automaton *wires = init_automaton(
-            24,
+            64,
             &wireworld,
             2
     );
     wires->cells = ww_conf;
-
-    /*
-    int gol_conf[] = {
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
-        1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
-        0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
-        0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
-        0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,
-        0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
-        0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
-        0,0,1,0,0,0,0,1,0,1,0,0,0,0,1,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    };
-    */
 
     struct automaton *conway = init_automaton(
             256,
@@ -174,37 +113,21 @@ int main() {
     );
     conway->cells = gol_conf;
 
-    /* keep track of active automaton to simulate */
-    struct automaton *active = conway;
+    active = conway;
 
     while (running) {
 
-        /* poll events */
-        if (SDL_PollEvent(&e)) {
-            switch (e.type) {
-            case SDL_QUIT:
-                running = 0;
-                break;
-            case SDL_KEYDOWN:
-                switch (e.key.keysym.sym) {
-                case SDLK_q:
-                    running = 0;
-                    break;
-                case SDLK_p:
-                    printf("Paused\n");
-                    break;
-                }
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                printf("Mouse pressed!");
-                break;
-            }
-        }
+        handle_input();
 
-        /* render and update automaton */
+        /* render automaton */
         render(active);
 
-        SDL_Delay(20);
+        if (!paused) {
+            /* update automaton */
+            active->sim(active);
+            SDL_Delay(20);
+        }
+
     }
 
     SDL_DestroyRenderer(renderer);
@@ -248,10 +171,10 @@ void render(struct automaton *ca) {
                     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
                     break;
                 case HEAD:
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
                     break;
                 case TAIL:
-                    SDL_SetRenderDrawColor(renderer, 255, 100, 0, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
                     break;
                 case CONDUCTOR:
                     SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
@@ -265,5 +188,119 @@ void render(struct automaton *ca) {
     }
 
     SDL_RenderPresent(renderer);
-    ca->sim(ca);
+    // ca->sim(ca);
+}
+
+void print_help(void) {
+    char help[] =
+        "States:\n\t"
+        "0 - DEAD\n\t"
+        "1 - ALIVE\n\t"
+        "2 - EMPTY\n\t"
+        "3 - HEAD\n\t"
+        "4 - TAIL\n\t"
+        "5 - CONDUCTOR\n\t"
+        "6 - \n\t"
+        "7 - \n\t"
+        "8 - \n\t"
+        "9 - \n";
+
+    printf("%s", help);
+}
+
+void handle_input() {
+
+    // Uint8 *keystate = SDL_GetKeyState(NULL);
+
+    /*
+    if(keystate[SDLK_LEFT])
+    if(keystate[SDLK_RIGHT])
+    if(keystate[SDLK_UP])
+    if(keystate[SDLK_DOWN])
+    */
+
+    /* keep track of which cell to modify in DRAW mode */
+    int n_i, n_j;
+
+    SDL_Event e;
+
+    /* poll events */
+    while (SDL_PollEvent(&e)) {
+        switch (e.type) {
+        case SDL_QUIT:
+            running = 0;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            switch (e.button.button) {
+            case SDL_BUTTON_LEFT:
+                if (mode == DRAW) {
+                    n_i = e.motion.x / active->cell_width;
+                    n_j = e.motion.y / active->cell_height;
+
+                    active->cells[n_j*active->len + n_i] = paintbrush;
+                }
+
+                break;
+            case SDL_BUTTON_RIGHT:
+                if (mode == DRAW) {
+                    n_i = e.motion.x / active->cell_width;
+                    n_j = e.motion.y / active->cell_height;
+
+                    active->cells[n_j*active->len + n_i] = DEAD;
+                }
+                break;
+            }
+            break;
+        case SDL_KEYDOWN:
+            switch (e.key.keysym.sym) {
+            case SDLK_h:
+                print_help();
+                break;
+            case SDLK_q:
+                running = 0;
+                break;
+            case SDLK_p:
+                if (paused)
+                    printf("Resuming...\n");
+                else
+                    printf("Paused\n");
+                paused = !paused;
+                break;
+            case SDLK_m:
+                mode = (mode == DRAW) ? SIMULATE : DRAW;
+                printf("%s mode\n", (mode == DRAW) ? "Draw" : "Simulate");
+                break;
+            case SDLK_0:
+                paintbrush = DEAD;
+                break;
+            case SDLK_1:
+                paintbrush = ALIVE;
+                break;
+            case SDLK_2:
+                paintbrush = EMPTY;
+                break;
+            case SDLK_3:
+                paintbrush = HEAD;
+                break;
+            case SDLK_4:
+                paintbrush = TAIL;
+                break;
+            case SDLK_5:
+                paintbrush = CONDUCTOR;
+                break;
+            case SDLK_6:
+                break;
+            case SDLK_7:
+                break;
+            case SDLK_8:
+                break;
+            case SDLK_9:
+                break;
+            default:
+                paintbrush = DEAD;
+            }
+            break;
+        }
+    }
+
 }

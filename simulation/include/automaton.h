@@ -12,9 +12,11 @@ enum direction {
 
 struct automaton {
     int *cells;
-    SDL_Rect *rects;
     int len;
     int dimension;
+    SDL_Rect *rects;
+    int cell_width;
+    int cell_height;
     simulate_fn sim;
 };
 

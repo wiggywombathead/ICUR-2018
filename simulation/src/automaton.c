@@ -15,27 +15,26 @@ struct automaton *init_automaton(int len, simulate_fn func, int d) {
 
     ca->rects = malloc(sizeof(SDL_Rect) * total_cells);
 
-    int c_width = WIN_WIDTH / len;
+    ca->cell_width = WIN_WIDTH / len;
+    ca->cell_height = WIN_HEIGHT / len;
 
     if (d == 1) {
 
         for (int i = 0; i < len; i++) {
-            ca->rects[i].w = c_width;
-            ca->rects[i].h = c_width;
-            ca->rects[i].x = i * c_width;
+            ca->rects[i].w = ca->cell_width;
+            ca->rects[i].h = ca->cell_width;
+            ca->rects[i].x = i * ca->cell_width;
             ca->rects[i].y = 0;
         }
 
     } else {
 
-        int c_height = WIN_HEIGHT / len;
-
         for (int i = 0 ; i < len; i++) {
             for (int j = 0; j < len; j++) {
-                ca->rects[i * len + j].w = c_width;
-                ca->rects[i * len + j].h = c_height;
-                ca->rects[i * len + j].x = j * c_width;
-                ca->rects[i * len + j].y = i * c_height;
+                ca->rects[i * len + j].w = ca->cell_width;
+                ca->rects[i * len + j].h = ca->cell_height;
+                ca->rects[i * len + j].x = j * ca->cell_width;
+                ca->rects[i * len + j].y = i * ca->cell_height;
             }
         }
 
