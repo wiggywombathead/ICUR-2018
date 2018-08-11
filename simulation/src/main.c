@@ -113,7 +113,7 @@ int main() {
     );
     conway->cells = gol_conf;
 
-    active = conway;
+    active = wires;
 
     while (running) {
 

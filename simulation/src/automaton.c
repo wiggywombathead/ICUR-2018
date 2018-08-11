@@ -61,6 +61,7 @@ void rule_90(struct automaton *ca) {
     new[0] = ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2];
 
+    free(ca->cells);
     ca->cells = new;
 
 }
@@ -91,6 +92,7 @@ void rule_110(struct automaton *ca) {
     new[0] = result;
     new[ca->len-1] = ca->cells[ca->len-1];
 
+    free(ca->cells);
     ca->cells = new;
 }
 
@@ -148,6 +150,7 @@ void gol(struct automaton *ca) {
         }
     }
 
+    free(ca->cells);
     ca->cells = new;
 
 }
@@ -219,6 +222,7 @@ void wireworld(struct automaton *ca) {
         }
     }
 
+    free(ca->cells);
     ca->cells = new;
 
 }
