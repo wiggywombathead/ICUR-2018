@@ -26,6 +26,7 @@ extern void rule_90(struct automaton *);
 extern void rule_110(struct automaton *);
 extern void gol(struct automaton *);
 extern void wireworld(struct automaton *);
+extern void langton(struct automaton *);
 
 void render(struct automaton *);
 void handle_input(void);
@@ -113,7 +114,15 @@ int main() {
     );
     conway->cells = gol_conf;
 
-    active = wires;
+    int *lang = calloc(512*512, sizeof(int));
+    struct automaton *ant = init_automaton(
+            512,
+            &langton,
+            2
+    );
+    ant->cells = lang;
+
+    active = ant;
 
     while (running) {
 
@@ -125,7 +134,7 @@ int main() {
         if (!paused) {
             /* update automaton */
             active->sim(active);
-            SDL_Delay(20);
+            SDL_Delay(2);
         }
 
     }

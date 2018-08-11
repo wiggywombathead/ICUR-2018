@@ -227,6 +227,54 @@ void wireworld(struct automaton *ca) {
 
 }
 
+/**
+ * black -> white, turn left
+ * white -> black, turn right
+ * move ant forward
+ */
 void langton(struct automaton *ca) {
+
+    // int total_cells = (int) pow(ca->len, ca->dimension);
+
+    // int *new = calloc(total_cells, sizeof(int));
+    // memcpy(new, ca->cells, sizeof(int) * total_cells);
+
+    static int ant = 512*512/2 + (512/2); //(ca->len / 2)*ca->len + (ca->len / 2);
+    static int dx = 1, dy = 0;
+
+    /*
+     *  a.b = |a||b| cos theta
+     *  a.b = 0 (orthogonal)
+     *
+     *  we have a, want b
+     *  ax.bx + ay.by = 0
+     *  bx = -(ay.by)/ax
+     *
+     *  |b| = 1 = sqrt(b.b) = pow(bx,2)+pow(by,2)
+     *  bx = sqrt(1 - pow(by,2))
+     *
+     *  [ALGEBRA]
+     *
+     *  by = +/- sqrt(1/(1+pow(ay,2)/pow(ax,2)))
+     */
+
+    int k;
+
+    switch (ca->cells[ant]) {
+    case DEAD:
+        ca->cells[ant] = ALIVE;
+        k = dx;
+        dx = -dy;
+        dy = k;
+        break;
+    case ALIVE:
+        ca->cells[ant] = DEAD;
+        k = dy;
+        dy = -dx;
+        dx = k;
+        break;
+    }
+
+    ant += (dy*ca->len + dx);
 
 }
