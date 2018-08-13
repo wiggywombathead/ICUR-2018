@@ -3,15 +3,16 @@
 #include "global.h"
 #include "automaton.h"
 
-struct automaton *init_automaton(int len, simulate_fn func, int d) {
+struct automaton *init_automaton(int len, simulate_fn func, int d, int g) {
     struct automaton *ca = malloc(sizeof(struct automaton));
 
     int total_cells = (int) pow(len, d);
     ca->cells = calloc(total_cells, sizeof(int));
     
     ca->len = len;
-    ca->dimension = d;
     ca->sim = func;
+    ca->dimension = d;
+    ca->max_gens = g;
 
     ca->rects = malloc(sizeof(SDL_Rect) * total_cells);
 
@@ -47,8 +48,9 @@ struct automaton *init_automaton(int len, simulate_fn func, int d) {
  * 111 110 101 100 011 010 001 000
  *  0   1   0   1   1   0   1   0
  */
-void rule_90(struct automaton *ca) {
+void rule_90(void *data) {
 
+    struct automaton *ca = (struct automaton *) data;
     int total_cells = (int) pow(ca->len, ca->dimension);
    
     /* create new array to compute states without changing current ones */
@@ -70,8 +72,9 @@ void rule_90(struct automaton *ca) {
  * 111 110 101 100 011 010 001 000
  *  0   1   1   0   1   1   1   0
  */
-void rule_110(struct automaton *ca) {
+void rule_110(void *data) {
 
+    struct automaton *ca = (struct automaton *) data;
     int total_cells = (int) pow(ca->len, ca->dimension);
 
     /* create new array to compute states without changing current ones */
@@ -96,8 +99,9 @@ void rule_110(struct automaton *ca) {
     ca->cells = new;
 }
 
-void gol(struct automaton *ca) {
+void gol(void *data) {
 
+    struct automaton *ca = (struct automaton *) data;
     int total_cells = (int) pow(ca->len, ca->dimension);
 
     int *new = calloc(total_cells, sizeof(int));
@@ -162,8 +166,9 @@ void gol(struct automaton *ca) {
  * conductor    -> head iff 2 neighbours are heads
  *              -> conductor otherwise
  */
-void wireworld(struct automaton *ca) {
+void wireworld(void *data) {
 
+    struct automaton *ca = (struct automaton *) data;
     int total_cells = (int) pow(ca->len, ca->dimension);
 
     int *new = calloc(total_cells, sizeof(int));
@@ -232,15 +237,24 @@ void wireworld(struct automaton *ca) {
  * white -> black, turn right
  * move ant forward
  */
-void langton(struct automaton *ca) {
+void langton(void *data) {
+
+    struct langton_config *lc = (struct langton_config *) data;
+
+    struct ant *ant = lc->ant;
+    struct automaton *ca = lc->automaton;
+
+    int x = ant->x;
+    int y = ant->y;
+    int dx = ant->dx;
+    int dy = ant->dy;
+
+    int offset = y * ca->len + x;
 
     // int total_cells = (int) pow(ca->len, ca->dimension);
 
     // int *new = calloc(total_cells, sizeof(int));
     // memcpy(new, ca->cells, sizeof(int) * total_cells);
-
-    static int ant = 512*512/2 + (512/2); //(ca->len / 2)*ca->len + (ca->len / 2);
-    static int dx = 1, dy = 0;
 
     /*
      *  a.b = |a||b| cos theta

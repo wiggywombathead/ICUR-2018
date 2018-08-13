@@ -10,6 +10,12 @@
 #include "global.h"
 #include "automaton.h"
 
+/* TODO
+ *  for langton's ant, pass ant coords in void * param (along with ca)
+ *  render active->cells[ant] as an unused color e.g. red
+ *  add ant coords to struct automaton ?
+ */
+
 pthread_t threads[2];
 pthread_mutex_t mutex;
 
@@ -22,11 +28,11 @@ int mode = SIMULATE;    /* enable/disable drawing */
 int paintbrush;         /* the state with which to overwrite cell */
 struct automaton *active;
 
-extern void rule_90(struct automaton *);
-extern void rule_110(struct automaton *);
-extern void gol(struct automaton *);
-extern void wireworld(struct automaton *);
-extern void langton(struct automaton *);
+extern void rule_90(void *);
+extern void rule_110(void *);
+extern void gol(void *);
+extern void wireworld(void *);
+extern void langton(void *);
 
 void render(struct automaton *);
 void handle_input(void);
@@ -67,8 +73,6 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    /* program setup */
-
     srand(time(NULL));
 
     int config[512];
@@ -80,14 +84,16 @@ int main() {
     struct automaton *rule90 = init_automaton(
             sizeof(config) / sizeof(int),
             &rule_90,
-            1
+            1,
+            1000
     );
     rule90->cells = config;
 
     struct automaton *rule110 = init_automaton(
             sizeof(config) / sizeof(int),
             &rule_110,
-            1
+            1,
+            1000
     );
     rule110->cells = config;
 
@@ -103,22 +109,25 @@ int main() {
     struct automaton *wires = init_automaton(
             64,
             &wireworld,
-            2
+            2,
+            1000
     );
     wires->cells = ww_conf;
 
     struct automaton *conway = init_automaton(
             256,
             &gol,
-            2
+            2,
+            1000
     );
     conway->cells = gol_conf;
 
-    int *lang = calloc(512*512, sizeof(int));
+    int *lang = calloc(128*128, sizeof(int));
     struct automaton *ant = init_automaton(
-            512,
+            128,
             &langton,
-            2
+            2,
+            1000
     );
     ant->cells = lang;
 
@@ -134,7 +143,7 @@ int main() {
         if (!paused) {
             /* update automaton */
             active->sim(active);
-            SDL_Delay(2);
+            SDL_Delay(200);
         }
 
     }
@@ -188,6 +197,9 @@ void render(struct automaton *ca) {
                 case CONDUCTOR:
                     SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
                     break;
+                case ANT:
+                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+                    break;
                 }
 
                 SDL_RenderFillRect(renderer, &ca->rects[offset]);
@@ -197,7 +209,6 @@ void render(struct automaton *ca) {
     }
 
     SDL_RenderPresent(renderer);
-    // ca->sim(ca);
 }
 
 void print_help(void) {

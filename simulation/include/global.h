@@ -13,7 +13,10 @@ enum states {
     EMPTY,
     HEAD,
     TAIL,
-    CONDUCTOR
+    CONDUCTOR,
+
+    /* Langton's Ant */
+    ANT
 };
 
 enum modes {
