@@ -75,14 +75,13 @@ int main() {
 
     srand(time(NULL));
 
-    int config[512];
-    for (int i = 0; i < 512; i++) {
-        config[i] = 0;
+    int *config = calloc(256, sizeof(int));
+    for (int i = 0; i < 256; i++) {
+        config[i] = rand() % 2;
     }
-    config[511] = 1;
 
     struct automaton *rule90 = init_automaton(
-            sizeof(config) / sizeof(int),
+            256,
             &rule_90,
             1,
             1000
@@ -90,7 +89,7 @@ int main() {
     rule90->cells = config;
 
     struct automaton *rule110 = init_automaton(
-            sizeof(config) / sizeof(int),
+            256,
             &rule_110,
             1,
             1000
@@ -131,7 +130,7 @@ int main() {
     );
     ant->cells = lang;
 
-    active = ant;
+    active = rule90;
 
     while (running) {
 
@@ -143,7 +142,7 @@ int main() {
         if (!paused) {
             /* update automaton */
             active->sim(active);
-            SDL_Delay(200);
+            SDL_Delay(20);
         }
 
     }

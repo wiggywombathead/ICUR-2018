@@ -274,15 +274,15 @@ void langton(void *data) {
 
     int k;
 
-    switch (ca->cells[ant]) {
+    switch (offset) {
     case DEAD:
-        ca->cells[ant] = ALIVE;
+        ca->cells[offset] = ALIVE;
         k = dx;
         dx = -dy;
         dy = k;
         break;
     case ALIVE:
-        ca->cells[ant] = DEAD;
+        ca->cells[offset] = DEAD;
         k = dy;
         dy = -dx;
         dx = k;

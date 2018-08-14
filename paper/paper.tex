@@ -7,6 +7,7 @@
 \usepackage{subfig}
 \usepackage{amsmath}
 \usepackage{url}
+\usepackage{diagbox}
 
 \title{Cellular Automata and Computational Universality}
 
@@ -53,7 +54,7 @@
     
     Consider the cellular automaton defined by the simple rule:
     \begin{equation}
-        \label{rule90}
+        \label{eq:rule90}
         a_{i}^{t+1} = a_{i-1}^{t} + a_{i+1}^{t} \mod{2}
     \end{equation}
 
@@ -66,14 +67,14 @@
 
     \begin{figure}[h]
         \begin{center}
-            \includegraphics[width=4in]{rule1.png}
+            \includegraphics[width=4in]{rule90.png}
             \caption{Pattern generated from applying Eq. 1 over 129 generations}
             \label{fig:rule90}
         \end{center}
     \end{figure}
 
     \subsection{Self-similarity}
-    Figure \ref{fig:rule90} shows a visualisation of Eq. \ref{rule90}. A cell is
+    Figure \ref{fig:rule90} shows a visualisation of Eq. \ref{eq:rule90}. A cell is
     filled white if it has the value 1, and black otherwise. Note that each new
     ``line'' of the visualisation represents the automaton in the next
     successive time-step from the one before; this automaton is one-dimensional,
@@ -82,8 +83,8 @@
     ``self-similarity'', meaning that portions of the pattern generated are
     indistinguishable from the whole when magnified. As Wolfram states, in this
     way ``the pattern is therefore invariant under rescaling... and may be
-    characterised by a fractal dimension''\cite{WolframFractal}. One such
-    definition of this is the Hausdorff-Besicovitch dimension\cite{Hausdorff}.
+    characterised by a fractal dimension'' \cite{WolframFractal}. One such
+    definition of this is the Hausdorff-Besicovitch dimension \cite{Hausdorff}.
 
     As an example, suppose we have a cube with some mass, and we wish to find
     out how the mass scales when we try to make the same cube out of smaller
@@ -102,7 +103,7 @@
     \begin{equation}
         \label{sierpinskiDim}
         \begin{split}
-            \tfrac{1}{3} & = (\tfrac{1}{2})^D \\
+            \tfrac{1}{3} &= (\tfrac{1}{2})^D \\
             \log{\tfrac{1}{3}} &= D \log{\tfrac{1}{2}} \\
             D &= \tfrac{\log{3}}{\log{2}} \approx 1.585
         \end{split}
@@ -124,15 +125,119 @@
 
     \subsection{Self-organisation}
     Second of the characteristics exhibited by this cellular automaton is
-    ``self-organisation'', 
+    ``self-organisation'', whereby from an initial disorderly or chaotic state
+    there appear ordered structures seemingly spontaneously. This is illustrated
+    in Fig. \ref{fig:self-organisation} below: one can clearly see the emergence
+    of similar triangular structures in the cone snail's shell, appearing from a
+    chaotic background. This starting chaos is modelled in the cellular
+    automaton by randomly assigning each cell a value of 0 or 1.
 
-\section{}
+    \begin{figure}[h]%
+        \centering
+        \subfloat[Shell of a cone
+        snail]{{\includegraphics[width=2in]{cone_shell.jpg}}}%
+        \qquad
+        \subfloat[Rule 90 with random starting
+        configuration]{{\includegraphics[width=2in]{rule90_rand.png}}}%
+        \caption{Natural processes can exhibit structures found in automata}
+        \label{fig:self-organisation}
+    \end{figure}
+
+\section{Classifying automata}
+    In order to classify automata, we can take into account both the size of the
+    neighbourhood each cell considers going into the next generation, as well as
+    the number of possible states in which a cell may be. Call these $N$ and $Q$
+    respectively; in the case of Eq. \ref{eq:rule90}, $N=3$ and $Q=2$, and so the
+    total number of different ``transitions'' from one state to the next is $N^Q
+    = 8$. We may write out all of these transitions as follows:
+
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{c|c|c|c|c|c|c|c}
+            111 & 110 & 101 & 100 & 011 & 010 & 001 & 000 \\
+            \hline
+            0   & 1   & 0   & 1   & 1   & 0   & 1   & 0
+        \end{tabular}
+    \end{table}
+
+    Reading the bottom row of this transition table, we get the binary number
+    $01011010_2 = 90_{10}$, allowing us to name this rule set Rule 90. Using
+    this convention, we may now construct our own automata based solely on the
+    knowledge of its name (at least for elementary cellular automata). For
+    example, take Rule 110, introduced by Wolfram 1983 \cite{WolframRule110}. We
+    first convert $110_{10}$ to binary, and then use this to fill in the table
+    as above:
+
+    \begin{table}[h]
+        \begin{minipage}{.5\linewidth}
+            \centering
+            \begin{tabular}{c|c|c|c|c|c|c|c}
+                111 & 110 & 101 & 100 & 011 & 010 & 001 & 000 \\
+                \hline
+                ? & ? & ? & ? & ? & ? & ? & ?
+            \end{tabular}
+        \end{minipage}%
+        $ \Rightarrow $
+        \begin{minipage}{.6\linewidth}
+            \begin{tabular}{c|c|c|c|c|c|c|c}
+                111 & 110 & 101 & 100 & 011 & 010 & 001 & 000 \\
+                \hline
+                0 & 1 & 1 & 0 & 1 & 1 & 1 & 0
+            \end{tabular}
+        \end{minipage}
+    \end{table}
+
+    To convert this to a concrete set of rules to simulate in a computer
+    programs (in a more elegant way than a collection of eight \texttt{if}
+    statements), we can put the information we have gathered so far in a
+    Karnaugh map to get a Boolean algebraic expression of the ruleset, as in the
+    table below. We use $A$ , $B$, and $C$ to denote $a_{i-1}$, $a_i$, and
+    $a_{i+1}$, at time $t$, respectively. From this we can reduce the ruleset to
+    the Boolean expression in Eq. \ref{eq:rule110} by observation.
+
+    \begin{table}[h]
+        %\caption{The Karnaugh map resulting from decoding Rule 110}
+        %\label{kmap}
+        \centering
+        \begin{tabular}{|c||c|c|c|c|}\hline
+            \diagbox{C}{AB} & 00 & 01 & 11 & 10 \\
+            \hline
+            0 & 0  & 1  & 1  & 0    \\
+            \hline
+            1 & 1  & 1  & 0  & 1    \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    \begin{equation}
+        \label{eq:rule110}
+        \begin{split}
+            B^{t+1} &= \overline{A} \cdot C + B \cdot \overline{C} + \overline{B} \cdot C \\
+            &= \overline{A} \cdot C + B \oplus C
+        \end{split}
+    \end{equation}
+
+    The resulting visualisation in Fig. \ref{fig:rule110} exhibits similar
+    characteristic of self-organisation, however it is hard to say whether it
+    shows self-similarity as well.
+
+    \begin{figure}[h]
+        \begin{center}
+            \includegraphics[width=4in]{rule110.png}
+            \caption{Rule 110 generated using Eq. \ref{eq:rule110}}
+            \label{fig:rule110}
+        \end{center}
+    \end{figure}
+
+    \subsection{Elementary cellular automata}
+    \subsection{Life-like cellular automata}
+    \subsection{Cyclic cellular automata}
+
 \section{Examples}
 \section{Applications}
 \section{Computational Universality}
 \section{Firing Squad Synchronisation Problem}
 \section{Majority Problem}
-\section{}
 
 \bibliography{bibliography}
 
