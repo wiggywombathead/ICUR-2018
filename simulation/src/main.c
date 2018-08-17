@@ -35,19 +35,18 @@ SDL_Renderer *renderer;
 
 int running = true;
 int paused = false;
-int mode = SIMULATE;    /* enable/disable drawing */
-int paintbrush;         /* the state with which to overwrite cell */
-struct automaton *active;
+int mode = DRAW;            /* enable/disable drawing */
+int paintbrush = ALIVE;     /* the state with which to overwrite cell */
 
-extern void rule_90(void *);
-extern void rule_110(void *);
-extern void gol(void *);
-extern void wireworld(void *);
-extern void langton(void *);
+struct automaton *active;
+struct automaton *rule90;
+struct automaton *rule110;
+struct automaton *conway;
+struct automaton *wires;
+struct automaton *lang;
 
 void render(struct automaton *);
 void handle_input(void);
-void print_help(void);
 
 int main() {
 
@@ -91,7 +90,7 @@ int main() {
         config[i] = rand() % 2;
     }
 
-    struct automaton *rule90 = init_automaton(
+    rule90 = init_automaton(
             512,
             &rule_90,
             1,
@@ -99,7 +98,7 @@ int main() {
     );
     rule90->cells = config;
 
-    struct automaton *rule110 = init_automaton(
+    rule110 = init_automaton(
             256,
             &rule_110,
             1,
@@ -111,7 +110,7 @@ int main() {
     for (int i = 0; i < 64*64; i++)
         ww_conf[i] = EMPTY;
 
-    struct automaton *wires = init_automaton(
+    wires = init_automaton(
             64,
             &wireworld,
             2,
@@ -120,7 +119,8 @@ int main() {
     wires->cells = ww_conf;
 
     int *gol_conf = calloc(128 * 128, sizeof(int));
-    struct automaton *conway = init_automaton(
+    
+    conway = init_automaton(
             128,
             &gol,
             2,
@@ -128,7 +128,7 @@ int main() {
     );
     conway->cells = gol_conf;
 
-    int *lang = calloc(128*128, sizeof(int));
+    lang = calloc(128*128, sizeof(int));
     struct automaton *ant = init_automaton(
             128,
             &langton,
@@ -136,13 +136,17 @@ int main() {
             1000
     );
     ant->cells = lang;
-
-    active = wires;
-
+    
+    /* fps regulation */
     unsigned int frame_start;
     unsigned int frame_curr;
     unsigned int wait_time;
 
+    /* simulation speed */
+    int ticks = 0;
+
+    /* main program execution */
+    active = conway;
     frame_start = SDL_GetTicks();
 
     while (running) {
@@ -153,10 +157,15 @@ int main() {
         render(active);
 
         if (!paused) {
-            /* update automaton */
-            active->sim(active);
+            if (ticks > 5) {
+                /* update automaton */
+                active->sim(active);
+                ticks = 0;
+            }
+            ticks++;
         }
 
+        /* fix framerate at FRAME_RATE fps */
         frame_curr = SDL_GetTicks();
 
         if (frame_curr < frame_start + FRAME_INTERVAL) {
@@ -231,27 +240,12 @@ void render(struct automaton *ca) {
     SDL_RenderPresent(renderer);
 }
 
-void print_help(void) {
-    char help[] =
-        "States:\n\t"
-        "0 - DEAD\n\t"
-        "1 - ALIVE\n\t"
-        "2 - EMPTY\n\t"
-        "3 - HEAD\n\t"
-        "4 - TAIL\n\t"
-        "5 - CONDUCTOR\n\t"
-        "6 - \n\t"
-        "7 - \n\t"
-        "8 - \n\t"
-        "9 - \n";
-
-    printf("%s", help);
-}
-
 void handle_input() {
 
     /* for mouse coords */
     static int x1, y1, x2, y2;
+
+    static bool ctrl = false;
 
     /* keep track of which cell to modify in DRAW mode */
     int n_i, n_j;
@@ -260,6 +254,7 @@ void handle_input() {
 
     /* poll events */
     while (SDL_PollEvent(&e)) {
+
         switch (e.type) {
         case SDL_QUIT:
             running = 0;
@@ -267,22 +262,16 @@ void handle_input() {
         case SDL_MOUSEBUTTONDOWN:
             switch (e.button.button) {
             case SDL_BUTTON_LEFT:
-                if (mode == DRAW) {
-                    n_i = e.motion.x / active->cell_width;
-                    n_j = e.motion.y / active->cell_height;
+                n_i = e.motion.x / active->cell_width;
+                n_j = e.motion.y / active->cell_height;
 
-                    active->cells[n_j*active->len + n_i] = paintbrush;
-                }
-
+                active->cells[n_j*active->len + n_i] = paintbrush;
                 break;
             case SDL_BUTTON_RIGHT:
-                if (mode == DRAW) {
-                    n_i = e.motion.x / active->cell_width;
-                    n_j = e.motion.y / active->cell_height;
+                n_i = e.motion.x / active->cell_width;
+                n_j = e.motion.y / active->cell_height;
 
-                    active->cells[n_j*active->len + n_i] = DEAD;
-                }
-                break;
+                active->cells[n_j*active->len + n_i] = DEAD;
             }
             break;
         case SDL_KEYDOWN:
@@ -290,11 +279,8 @@ void handle_input() {
             case SDLK_LSHIFT:
                 SDL_GetMouseState(&x1, &y1);
                 break;
-            case SDLK_h:
-                print_help();
-                break;
-            case SDLK_q:
-                running = 0;
+            case SDLK_LCTRL:
+                ctrl = true;
                 break;
             case SDLK_p:
                 if (paused)
@@ -303,23 +289,47 @@ void handle_input() {
                     printf("Paused\n");
                 paused = !paused;
                 break;
-            case SDLK_m:
-                mode = (mode == DRAW) ? SIMULATE : DRAW;
-                printf("%s mode\n", (mode == DRAW) ? "Draw" : "Simulate");
+            case SDLK_q:
+                running = 0;
                 break;
             case SDLK_0:
-                paintbrush = DEAD;
+                if (ctrl) {
+                    active = rule110;
+                } else {
+                    paintbrush = ALIVE;
+                }
                 break;
             case SDLK_1:
-                paintbrush = ALIVE;
+                if (ctrl) {
+                    active = conway;
+                    printf("Welcome to the Game of Life!\n");
+                } else {
+                    paintbrush = ALIVE;
+                }
                 break;
             case SDLK_2:
-                paintbrush = HEAD;
+                if (ctrl) {
+                    active = wires;
+                    printf("Welcome to WireWorld!\n");
+                } else {
+                    paintbrush = ALIVE;
+                }
                 break;
             case SDLK_3:
-                paintbrush = CONDUCTOR;
+                if (ctrl) {
+                    active = rule90;
+                    printf("Welcome to Rule 90!\n");
+                } else {
+                    paintbrush = ALIVE;
+                }
                 break;
             case SDLK_4:
+                if (ctrl) {
+                    active = rule110;
+                    printf("Welcome to Rule 110!\n");
+                } else {
+                    paintbrush = ALIVE;
+                }
                 break;
             case SDLK_5:
                 break;
@@ -356,15 +366,19 @@ void handle_input() {
                 }
 
                 break;
+            case SDLK_LCTRL:
+                ctrl = false;
+                break;
             }
 
         }
+
     }
 
-    Uint8* keystate = SDL_GetKeyboardState(NULL);
+    Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
     /* continuous response keys */
-    if (keystate[SDL_SCANCODE_LSHIFT]) {
+    if (keystate[SDL_SCANCODE_LCTRL]) {
     }
 
     if(keystate[SDLK_RIGHT]) {

@@ -23,6 +23,9 @@ Currently, it can simulate:
 `p` - pause/resume simulation
 `q` - quit
 
+## Notes
+Only switch between different 2D cellular automata for now
+
 ## TODO
 * Langton's Ant (in progress)
 * Brian's Brain

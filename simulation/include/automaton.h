@@ -33,4 +33,10 @@ struct langton_config {
 
 struct automaton *init_automaton(int len, simulate_fn func, int d, int g);
 
+void rule_90(void *);
+void rule_110(void *);
+void gol(void *);
+void wireworld(void *);
+void langton(void *);
+
 #endif

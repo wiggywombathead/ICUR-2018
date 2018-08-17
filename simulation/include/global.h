@@ -21,9 +21,4 @@ enum states {
     ANT
 };
 
-enum modes {
-    SIMULATE,
-    DRAW
-};
-
 #endif
