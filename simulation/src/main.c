@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
-#include <pthread.h>
 
 #include <SDL2/SDL.h>
 
@@ -16,8 +15,8 @@
  *  add ant coords to struct automaton ?
  */
 
-pthread_t threads[2];
-pthread_mutex_t mutex;
+/* milliseconds for each frame to take */
+const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
 
 SDL_Window *window;
 SDL_Renderer *renderer;
@@ -75,13 +74,13 @@ int main() {
 
     srand(time(NULL));
 
-    int *config = calloc(256, sizeof(int));
-    for (int i = 0; i < 256; i++) {
+    int *config = calloc(512, sizeof(int));
+    for (int i = 0; i < 512; i++) {
         config[i] = rand() % 2;
     }
 
     struct automaton *rule90 = init_automaton(
-            256,
+            512,
             &rule_90,
             1,
             1000
@@ -96,11 +95,6 @@ int main() {
     );
     rule110->cells = config;
 
-    int *gol_conf = calloc(256 * 256, sizeof(int));
-    gol_conf[32768] = gol_conf[32771] = gol_conf[33028] = gol_conf[33280] =
-        gol_conf[33284] = gol_conf[33537] = gol_conf[33538] = gol_conf[33539] =
-        gol_conf[33540] = ALIVE;
-
     int *ww_conf = calloc(64 * 64, sizeof(int));
     for (int i = 0; i < 64*64; i++)
         ww_conf[i] = EMPTY;
@@ -113,8 +107,9 @@ int main() {
     );
     wires->cells = ww_conf;
 
+    int *gol_conf = calloc(128 * 128, sizeof(int));
     struct automaton *conway = init_automaton(
-            256,
+            128,
             &gol,
             2,
             1000
@@ -130,7 +125,13 @@ int main() {
     );
     ant->cells = lang;
 
-    active = rule90;
+    active = wires;
+
+    unsigned int frame_start;
+    unsigned int frame_curr;
+    unsigned int wait_time;
+
+    frame_start = SDL_GetTicks();
 
     while (running) {
 
@@ -142,8 +143,16 @@ int main() {
         if (!paused) {
             /* update automaton */
             active->sim(active);
-            SDL_Delay(20);
         }
+
+        frame_curr = SDL_GetTicks();
+
+        if (frame_curr < frame_start + FRAME_INTERVAL) {
+            wait_time = frame_start + FRAME_INTERVAL - frame_curr;
+            SDL_Delay(wait_time);
+        }
+
+        frame_start = frame_curr;
 
     }
 
@@ -228,15 +237,6 @@ void print_help(void) {
 }
 
 void handle_input() {
-
-    // Uint8 *keystate = SDL_GetKeyState(NULL);
-
-    /*
-    if(keystate[SDLK_LEFT])
-    if(keystate[SDLK_RIGHT])
-    if(keystate[SDLK_UP])
-    if(keystate[SDLK_DOWN])
-    */
 
     /* keep track of which cell to modify in DRAW mode */
     int n_i, n_j;

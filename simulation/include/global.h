@@ -4,6 +4,8 @@
 #define WIN_WIDTH 512
 #define WIN_HEIGHT 512
 
+#define FRAME_RATE 60
+
 enum states {
     /* GoL */
     DEAD = 0,
