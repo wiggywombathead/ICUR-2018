@@ -17,6 +17,16 @@
  *  add ant coords to struct automaton ?
  */
 
+float lerp(float start, float end, float t) {
+    return start + t * (end - start);
+}
+
+int diag(int x1, int y1, int x2, int y2) {
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    return max(abs(dx), abs(dy));
+}
+
 /* milliseconds for each frame to take */
 const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
 
@@ -283,7 +293,6 @@ void handle_input() {
             switch (e.key.keysym.sym) {
             case SDLK_LSHIFT:
                 SDL_GetMouseState(&x1, &y1);
-                printf("Pressed at (%d,%d)\n", x1, y1);
                 break;
             case SDLK_h:
                 print_help();
@@ -337,21 +346,19 @@ void handle_input() {
             case SDLK_LSHIFT:
                 SDL_GetMouseState(&x2, &y2);
 
-                if (x1 != x2) {
-                    m = (y2-y1) / (x2-x1);
-                    c = y1 - m*x1;
+                int ai, aj, bi, bj;
+                ai = x1 / active->cell_width;
+                aj = y1 / active->cell_height;
+                bi = x2 / active->cell_width;
+                bj = y2 / active->cell_height;
 
-                    int upper = max(x1,x2);
-                    int lower = (upper == x1) ? x2 : x1;
-                    float y;
+                float N = (float) diag(ai, aj, bi, bj);
 
-                    for (float i = lower; i < upper; i+=.5) {
-                        y = m * i + c;
-                        n_i = i / active->cell_width;
-                        n_j = y / active->cell_height;
-
-                        active->cells[n_j*active->len + n_i] = paintbrush;
-                    }
+                for (int i = 0; i <= N; i++) {
+                    float t = (N == 0) ? 0.f : i / N;
+                    n_i = round(lerp(ai, bi, t));
+                    n_j = round(lerp(aj, bj, t));
+                    active->cells[n_j*active->len + n_i] = paintbrush;
                 }
 
                 break;
