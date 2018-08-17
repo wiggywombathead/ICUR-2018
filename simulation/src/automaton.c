@@ -205,8 +205,8 @@ void wireworld(void *data) {
                 heads += (ca->cells[curr + ca->len + 1] == HEAD);
 
             switch(ca->cells[curr]) {
-            case EMPTY:
-                new[curr] = EMPTY;
+            case DEAD:
+                new[curr] = DEAD;
                 break;
             case HEAD:
                 new[curr] = TAIL;
@@ -221,7 +221,7 @@ void wireworld(void *data) {
                     new[curr] = CONDUCTOR;
                 break;
             default:
-                new[curr] = EMPTY;
+                new[curr] = DEAD;
             }
 
         }

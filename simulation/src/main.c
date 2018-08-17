@@ -250,12 +250,8 @@ void print_help(void) {
 
 void handle_input() {
 
-    /* for drawing */
+    /* for mouse coords */
     static int x1, y1, x2, y2;
-
-    /* for computing equation of line */
-    float m;
-    float c;
 
     /* keep track of which cell to modify in DRAW mode */
     int n_i, n_j;
@@ -318,16 +314,14 @@ void handle_input() {
                 paintbrush = ALIVE;
                 break;
             case SDLK_2:
-                paintbrush = EMPTY;
-                break;
-            case SDLK_3:
                 paintbrush = HEAD;
                 break;
+            case SDLK_3:
+                paintbrush = CONDUCTOR;
+                break;
             case SDLK_4:
-                paintbrush = TAIL;
                 break;
             case SDLK_5:
-                paintbrush = CONDUCTOR;
                 break;
             case SDLK_6:
                 break;
@@ -338,7 +332,7 @@ void handle_input() {
             case SDLK_9:
                 break;
             default:
-                paintbrush = DEAD;
+                paintbrush = ALIVE;
             }
             break;
         case SDL_KEYUP:
