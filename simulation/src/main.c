@@ -17,16 +17,6 @@
  *  add ant coords to struct automaton ?
  */
 
-float lerp(float start, float end, float t) {
-    return start + t * (end - start);
-}
-
-int diag(int x1, int y1, int x2, int y2) {
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-    return max(abs(dx), abs(dy));
-}
-
 /* milliseconds for each frame to take */
 const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
 
@@ -35,7 +25,6 @@ SDL_Renderer *renderer;
 
 int running = true;
 int paused = false;
-int mode = DRAW;            /* enable/disable drawing */
 int paintbrush = ALIVE;     /* the state with which to overwrite cell */
 
 struct automaton *active;
@@ -47,6 +36,9 @@ struct automaton *lang;
 
 void render(struct automaton *);
 void handle_input(void);
+
+float lerp(float, float, float);
+int diag(int, int, int, int);
 
 int main() {
 
@@ -304,7 +296,7 @@ void handle_input() {
                     active = conway;
                     printf("Welcome to the Game of Life!\n");
                 } else {
-                    paintbrush = ALIVE;
+                    paintbrush = DEAD;
                 }
                 break;
             case SDLK_2:
@@ -320,7 +312,7 @@ void handle_input() {
                     active = rule90;
                     printf("Welcome to Rule 90!\n");
                 } else {
-                    paintbrush = ALIVE;
+                    paintbrush = HEAD;
                 }
                 break;
             case SDLK_4:
@@ -328,7 +320,7 @@ void handle_input() {
                     active = rule110;
                     printf("Welcome to Rule 110!\n");
                 } else {
-                    paintbrush = ALIVE;
+                    paintbrush = CONDUCTOR;
                 }
                 break;
             case SDLK_5:
@@ -390,4 +382,16 @@ void handle_input() {
     if(keystate[SDLK_DOWN]) {
     }
 
+}
+
+/* linear interpolation to approximate a line on the grid */
+float lerp(float start, float end, float t) {
+    return start + t * (end - start);
+}
+
+/* calculate value for N when interpolating */
+int diag(int x1, int y1, int x2, int y2) {
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    return max(abs(dx), abs(dy));
 }
