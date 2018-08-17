@@ -9,6 +9,8 @@
 #include "global.h"
 #include "automaton.h"
 
+#define max(a,b) ((a) >= (b) ? a : b)
+
 /* TODO
  *  for langton's ant, pass ant coords in void * param (along with ca)
  *  render active->cells[ant] as an unused color e.g. red
@@ -238,6 +240,13 @@ void print_help(void) {
 
 void handle_input() {
 
+    /* for drawing */
+    static int x1, y1, x2, y2;
+
+    /* for computing equation of line */
+    float m;
+    float c;
+
     /* keep track of which cell to modify in DRAW mode */
     int n_i, n_j;
 
@@ -272,6 +281,10 @@ void handle_input() {
             break;
         case SDL_KEYDOWN:
             switch (e.key.keysym.sym) {
+            case SDLK_LSHIFT:
+                SDL_GetMouseState(&x1, &y1);
+                printf("Pressed at (%d,%d)\n", x1, y1);
+                break;
             case SDLK_h:
                 print_help();
                 break;
@@ -319,7 +332,47 @@ void handle_input() {
                 paintbrush = DEAD;
             }
             break;
+        case SDL_KEYUP:
+            switch (e.key.keysym.sym) {
+            case SDLK_LSHIFT:
+                SDL_GetMouseState(&x2, &y2);
+
+                if (x1 != x2) {
+                    m = (y2-y1) / (x2-x1);
+                    c = y1 - m*x1;
+
+                    int upper = max(x1,x2);
+                    int lower = (upper == x1) ? x2 : x1;
+                    float y;
+
+                    for (float i = lower; i < upper; i+=.5) {
+                        y = m * i + c;
+                        n_i = i / active->cell_width;
+                        n_j = y / active->cell_height;
+
+                        active->cells[n_j*active->len + n_i] = paintbrush;
+                    }
+                }
+
+                break;
+            }
+
         }
+    }
+
+    Uint8* keystate = SDL_GetKeyboardState(NULL);
+
+    /* continuous response keys */
+    if (keystate[SDL_SCANCODE_LSHIFT]) {
+    }
+
+    if(keystate[SDLK_RIGHT]) {
+    }
+
+    if(keystate[SDLK_UP]) {
+    }
+
+    if(keystate[SDLK_DOWN]) {
     }
 
 }
