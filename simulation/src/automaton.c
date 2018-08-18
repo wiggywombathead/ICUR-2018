@@ -115,7 +115,6 @@ void rule_110(void *data) {
 
     /* create new array to compute states without changing current ones */
     int *new = malloc(sizeof(int) * total_cells);
-    int result;
 
     for (int i = 1; i < ca->len-1; i++) {
         int a, b, c;
@@ -137,7 +136,65 @@ void rule_110(void *data) {
     ca->cells = new;
 }
 
-void gol(void *data) {
+void brians_brain(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+
+    int *new = calloc(total_cells, sizeof(int));
+    memcpy(new, ca->cells, sizeof(int) * total_cells);
+
+    for (int i = 0; i < ca->len; i++) {
+        for (int  j = 0; j < ca->len; j++) {
+
+            int curr = i * ca->len + j;
+            int firing = 0;
+
+            if (ca->cells[curr] == FIRING)
+                new[curr] = DYING;
+
+            if (ca->cells[curr] == DYING)
+                new[curr] = DEAD;
+
+            if (ca->cells[curr] == DEAD) {
+                if (i > 0 && j > 0)
+                    firing += (ca->cells[curr - ca->len - 1] == FIRING);
+
+                if (i > 0)
+                    firing += (ca->cells[curr - ca->len] == FIRING);
+
+                if (i > 0 && j < ca->len-1)
+                    firing += (ca->cells[curr - ca->len + 1] == FIRING);
+
+                if (j > 0)
+                    firing += (ca->cells[curr - 1] == FIRING);
+
+                if (j < ca->len-1)
+                    firing += (ca->cells[curr + 1] == FIRING);
+
+                if (i < ca->len-1 && j > 0)
+                    firing += (ca->cells[curr + ca->len - 1] == FIRING);
+
+                if (i < ca->len-1)
+                    firing += (ca->cells[curr + ca->len] == FIRING);
+
+                if (i < ca->len-1 && j < ca->len-1)
+                    firing += (ca->cells[curr + ca->len + 1] == FIRING);
+
+                if (firing == 2)
+                    new[curr] = FIRING;
+
+            }
+
+        }
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+
+}
+
+void game_of_life(void *data) {
 
     struct automaton *ca = (struct automaton *) data;
     int total_cells = (int) pow(ca->len, ca->dimension);

@@ -7,12 +7,16 @@
 #define FRAME_RATE 60
 
 enum states {
-    /* GoL */
+
+    /* Game of Life */
     DEAD = 0,
     ALIVE = 1,
+
+    /* BRIAN'S BRAIN */
+    FIRING,
+    DYING,
     
     /* WireWorld */
-    EMPTY,
     HEAD,
     TAIL,
     CONDUCTOR,

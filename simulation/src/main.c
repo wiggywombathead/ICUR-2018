@@ -31,6 +31,7 @@ struct automaton *rule30;
 struct automaton *rule90;
 struct automaton *rule110;
 struct automaton *conway;
+struct automaton *brian;
 struct automaton *wires;
 struct automaton *lang;
 
@@ -104,9 +105,6 @@ int main() {
     rule110->cells = config;
 
     int *ww_conf = calloc(64 * 64, sizeof(int));
-    for (int i = 0; i < 64*64; i++)
-        ww_conf[i] = EMPTY;
-
     wires = init_automaton(
             64,
             &wireworld,
@@ -115,13 +113,20 @@ int main() {
     wires->cells = ww_conf;
 
     int *gol_conf = calloc(128 * 128, sizeof(int));
-    
     conway = init_automaton(
             128,
-            &gol,
+            &game_of_life,
             2
     );
     conway->cells = gol_conf;
+
+    int *brain_conf = calloc(128*128, sizeof(int));
+    brian = init_automaton(
+            128,
+            &brians_brain,
+            2
+    );
+    brian->cells = brain_conf;
 
     lang = calloc(128*128, sizeof(int));
     struct automaton *ant = init_automaton(
@@ -140,7 +145,7 @@ int main() {
     int ticks = 0;
 
     /* main program execution */
-    active = rule30;
+    active = brian;
     frame_start = SDL_GetTicks();
 
     while (running) {
@@ -151,7 +156,7 @@ int main() {
         render(active);
 
         if (!paused) {
-            if (ticks > 5) {
+            if (ticks > 3) {
                 /* update automaton */
                 active->sim(active);
                 ticks = 0;
@@ -164,10 +169,8 @@ int main() {
 
         if (frame_curr < frame_start + FRAME_INTERVAL) {
             wait_time = frame_start + FRAME_INTERVAL - frame_curr;
-            // SDL_Delay(wait_time);
+            SDL_Delay(wait_time);
         }
-
-        SDL_Delay(4);
 
         frame_start = frame_curr;
 
@@ -209,8 +212,11 @@ void render(struct automaton *ca) {
                 case ALIVE:
                     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
                     break;
-                case EMPTY:
-                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+                case FIRING:
+                    SDL_SetRenderDrawColor(renderer, 76, 242, 4, SDL_ALPHA_OPAQUE);
+                    break;
+                case DYING:
+                    SDL_SetRenderDrawColor(renderer, 229, 0, 225, SDL_ALPHA_OPAQUE);
                     break;
                 case HEAD:
                     SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
@@ -240,10 +246,14 @@ void handle_input() {
     /* for mouse coords */
     static int x1, y1, x2, y2;
 
+    static bool mouse = false;
     static bool ctrl = false;
 
     /* keep track of which cell to modify in DRAW mode */
     int n_i, n_j;
+
+    /* to calculate total size of array for memset */
+    int arr_size;
 
     SDL_Event e;
 
@@ -257,6 +267,7 @@ void handle_input() {
         case SDL_MOUSEBUTTONDOWN:
             switch (e.button.button) {
             case SDL_BUTTON_LEFT:
+                mouse = true;
                 n_i = e.motion.x / active->cell_width;
                 n_j = e.motion.y / active->cell_height;
 
@@ -268,6 +279,9 @@ void handle_input() {
 
                 active->cells[n_j*active->len + n_i] = DEAD;
             }
+            break;
+        case SDL_MOUSEBUTTONUP:
+            mouse = false;
             break;
         case SDL_KEYDOWN:
             switch (e.key.keysym.sym) {
@@ -283,6 +297,15 @@ void handle_input() {
                 else
                     printf("Paused\n");
                 paused = !paused;
+                break;
+            case SDLK_c:
+                arr_size = pow(active->len,active->dimension) * sizeof(int);
+                printf("Clearing %d bytes\n", arr_size);
+                memset(
+                    active->cells,
+                    DEAD,
+                    arr_size
+                );
                 break;
             case SDLK_q:
                 running = 0;
@@ -312,7 +335,7 @@ void handle_input() {
                 break;
             case SDLK_3:
                 if (ctrl) {
-                    active = rule90;
+                    active = brian;
                     printf("Welcome to Rule 90!\n");
                 } else {
                     paintbrush = HEAD;
@@ -320,15 +343,25 @@ void handle_input() {
                 break;
             case SDLK_4:
                 if (ctrl) {
-                    active = rule110;
-                    printf("Welcome to Rule 110!\n");
+                    active = rule30;
+                    printf("Welcome to Rule 30!\n");
                 } else {
                     paintbrush = CONDUCTOR;
                 }
                 break;
             case SDLK_5:
+                if (ctrl) {
+                    active = rule90;
+                    printf("Welcome to Rule 90!\n");
+                } else {
+                    paintbrush = FIRING;
+                }
                 break;
             case SDLK_6:
+                if (ctrl) {
+                    active = rule110;
+                    printf("Welcome to Rule 110\n");
+                }
                 break;
             case SDLK_7:
                 break;
@@ -370,7 +403,15 @@ void handle_input() {
 
     }
 
-    Uint8 *keystate = SDL_GetKeyboardState(NULL);
+    if (mouse) {
+        SDL_GetMouseState(&x1, &y1);
+        n_i = x1 / active->cell_width;
+        n_j = y1 / active->cell_height;
+
+        active->cells[n_j*active->len + n_i] = paintbrush;
+    }
+
+    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 
     /* continuous response keys */
     if (keystate[SDL_SCANCODE_LCTRL]) {
