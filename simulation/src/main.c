@@ -23,8 +23,9 @@ const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-int running = true;
-int paused = false;
+bool running = true;
+bool paused = false;
+bool step = false;
 int paintbrush = ALIVE;     /* the state with which to overwrite cell */
 
 struct automaton *rule30;
@@ -104,9 +105,9 @@ int main() {
     );
     rule110->cells = config;
 
-    int *ww_conf = calloc(64 * 64, sizeof(int));
+    int *ww_conf = calloc(128*128, sizeof(int));
     wires = init_automaton(
-            64,
+            128,
             &wireworld,
             2
     );
@@ -162,6 +163,11 @@ int main() {
                 ticks = 0;
             }
             ticks++;
+        } else {
+            if (step) {
+                active->sim(active);
+                step = !step;
+            }
         }
 
         /* fix framerate at FRAME_RATE fps */
@@ -291,6 +297,9 @@ void handle_input() {
             case SDLK_LCTRL:
                 ctrl = true;
                 break;
+            case SDLK_RIGHT:
+                step = true;
+                break;
             case SDLK_p:
                 if (paused)
                     printf("Resuming...\n");
@@ -336,7 +345,7 @@ void handle_input() {
             case SDLK_3:
                 if (ctrl) {
                     active = brian;
-                    printf("Welcome to Rule 90!\n");
+                    printf("Welcome to Brian's Brain!\n");
                 } else {
                     paintbrush = HEAD;
                 }
