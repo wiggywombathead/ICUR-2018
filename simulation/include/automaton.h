@@ -33,6 +33,7 @@ struct langton_config {
 
 struct automaton *init_automaton(int len, simulate_fn func, int d);
 
+void rule_30(void *);
 void rule_90(void *);
 void rule_110(void *);
 void gol(void *);

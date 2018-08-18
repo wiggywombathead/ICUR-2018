@@ -27,12 +27,14 @@ int running = true;
 int paused = false;
 int paintbrush = ALIVE;     /* the state with which to overwrite cell */
 
-struct automaton *active;
+struct automaton *rule30;
 struct automaton *rule90;
 struct automaton *rule110;
 struct automaton *conway;
 struct automaton *wires;
 struct automaton *lang;
+
+struct automaton *active;
 
 void render(struct automaton *);
 void handle_input(void);
@@ -78,10 +80,14 @@ int main() {
     srand(time(NULL));
 
     int *config = calloc(512, sizeof(int));
-    for (int i = 0; i < 512; i++) {
-        //config[i] = rand() % 2;
-    }
-    config[255] = 1;
+    config[256] = 1;
+
+    rule30 = init_automaton(
+            512,
+            &rule_30,
+            1
+    );
+    rule30->cells = config;
 
     rule90 = init_automaton(
             512,
@@ -134,7 +140,7 @@ int main() {
     int ticks = 0;
 
     /* main program execution */
-    active = rule110;
+    active = rule30;
     frame_start = SDL_GetTicks();
 
     while (running) {
@@ -158,8 +164,10 @@ int main() {
 
         if (frame_curr < frame_start + FRAME_INTERVAL) {
             wait_time = frame_start + FRAME_INTERVAL - frame_curr;
-            SDL_Delay(wait_time);
+            // SDL_Delay(wait_time);
         }
+
+        SDL_Delay(4);
 
         frame_start = frame_curr;
 

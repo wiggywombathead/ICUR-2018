@@ -45,6 +45,39 @@ struct automaton *init_automaton(int len, simulate_fn func, int d) {
 
 /**
  * 111 110 101 100 011 010 001 000
+ *  0   0   0   1   1   1   1   0
+ */
+void rule_30(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+   
+    /* create new array to compute states without changing current ones */
+    int *new = malloc(sizeof(int) * total_cells);
+
+    for (int i = 1; i < ca->len-1; i++) {
+        int a, b, c;
+        a = ca->cells[i-1];
+        b = ca->cells[i];
+        c = ca->cells[i+1];
+        
+        new[i] = (~a & (b | c)) | (a & ~b & ~c);
+    }
+
+    new[0] = ca->cells[0] | ca->cells[1];
+    new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+
+}
+
+/**
+ * 111 110 101 100 011 010 001 000
  *  0   1   0   1   1   0   1   0
  */
 void rule_90(void *data) {
@@ -56,7 +89,7 @@ void rule_90(void *data) {
     int *new = malloc(sizeof(int) * total_cells);
 
     for (int i = 1; i < ca->len-1; i++) {
-        new[i] = (ca->cells[i-1] + ca->cells[i+1]) % 2;
+        new[i] = ca->cells[i-1] ^ ca->cells[i+1];
     }
 
     new[0] = ca->cells[1];
@@ -85,17 +118,15 @@ void rule_110(void *data) {
     int result;
 
     for (int i = 1; i < ca->len-1; i++) {
-        result = (
-                (ca->cells[i] + ca->cells[i+1]) % 2) +
-                !ca->cells[i-1] * ca->cells[i+1];
-        result = (result > 0) ? 1 : 0;
-        new[i] = result;
+        int a, b, c;
+        a = ca->cells[i-1];
+        b = ca->cells[i];
+        c = ca->cells[i+1];
+
+        new[i] = (~a & c) | (b ^ c);
     }
 
-    result = ((ca->cells[0] + ca->cells[1]) % 2) + ca->cells[1];
-    result = (result > 0) ? 1 : 0;
-
-    new[0] = result;
+    new[0] = ca->cells[1] | (ca->cells[0] ^ ca->cells[1]);
     new[ca->len-1] = ca->cells[ca->len-1];
 
     for (int i = 0; i < ca->len; i++) {
