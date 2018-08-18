@@ -31,7 +31,7 @@ struct langton_config {
     struct automaton *automaton;
 };
 
-struct automaton *init_automaton(int len, simulate_fn func, int d, int g);
+struct automaton *init_automaton(int len, simulate_fn func, int d);
 
 void rule_90(void *);
 void rule_110(void *);

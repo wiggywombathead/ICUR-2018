@@ -79,22 +79,21 @@ int main() {
 
     int *config = calloc(512, sizeof(int));
     for (int i = 0; i < 512; i++) {
-        config[i] = rand() % 2;
+        //config[i] = rand() % 2;
     }
+    config[255] = 1;
 
     rule90 = init_automaton(
             512,
             &rule_90,
-            1,
-            1000
+            1
     );
     rule90->cells = config;
 
     rule110 = init_automaton(
             256,
             &rule_110,
-            1,
-            1000
+            1
     );
     rule110->cells = config;
 
@@ -105,8 +104,7 @@ int main() {
     wires = init_automaton(
             64,
             &wireworld,
-            2,
-            1000
+            2
     );
     wires->cells = ww_conf;
 
@@ -115,8 +113,7 @@ int main() {
     conway = init_automaton(
             128,
             &gol,
-            2,
-            1000
+            2
     );
     conway->cells = gol_conf;
 
@@ -124,8 +121,7 @@ int main() {
     struct automaton *ant = init_automaton(
             128,
             &langton,
-            2,
-            1000
+            2
     );
     ant->cells = lang;
     
@@ -138,7 +134,7 @@ int main() {
     int ticks = 0;
 
     /* main program execution */
-    active = conway;
+    active = rule110;
     frame_start = SDL_GetTicks();
 
     while (running) {
@@ -189,7 +185,6 @@ void render(struct automaton *ca) {
             }
 
             SDL_RenderFillRect(renderer, &ca->rects[i]);
-            ca->rects[i].y += ca->rects[i].h;
         }
 
     } else {

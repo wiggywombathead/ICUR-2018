@@ -3,7 +3,7 @@
 #include "global.h"
 #include "automaton.h"
 
-struct automaton *init_automaton(int len, simulate_fn func, int d, int g) {
+struct automaton *init_automaton(int len, simulate_fn func, int d) {
     struct automaton *ca = malloc(sizeof(struct automaton));
 
     int total_cells = (int) pow(len, d);
@@ -12,7 +12,6 @@ struct automaton *init_automaton(int len, simulate_fn func, int d, int g) {
     ca->len = len;
     ca->sim = func;
     ca->dimension = d;
-    ca->max_gens = g;
 
     ca->rects = malloc(sizeof(SDL_Rect) * total_cells);
 
@@ -63,6 +62,10 @@ void rule_90(void *data) {
     new[0] = ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2];
 
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
     free(ca->cells);
     ca->cells = new;
 
@@ -94,6 +97,10 @@ void rule_110(void *data) {
 
     new[0] = result;
     new[ca->len-1] = ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
 
     free(ca->cells);
     ca->cells = new;
