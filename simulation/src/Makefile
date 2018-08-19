@@ -1,8 +1,8 @@
 CC = gcc
 IDIR = ../include
 ODIR = objs
-LIBS = -lSDL2 -lm -pthread
-CFLAGS = -O2 -Wall -g -I$(IDIR)
+LIBS = -lSDL2 -lSDL2_ttf -lm -pthread `sdl-config --libs`
+CFLAGS = -O2 -Wall -g -I$(IDIR) `sdl-config --cflags`
 
 _DEPS = automaton.h global.h
 DEPS = $(patsubst %, $(IDIR)/%, $(_DEPS))

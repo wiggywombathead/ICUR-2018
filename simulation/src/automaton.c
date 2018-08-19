@@ -40,7 +40,22 @@ struct automaton *init_automaton(int len, simulate_fn func, int d) {
 
     }
 
+    ca->is_langton = false;
+
     return ca;
+}
+
+struct ant *init_ant(int x, int y, int dx, int dy, struct automaton *ca) {
+    struct ant *ant = malloc(sizeof(struct ant));
+    ant->x = x;
+    ant->y = y;
+    ant->dx = dx;
+    ant->dy = dy;
+
+    ca->ant = ant;
+    ca->is_langton = true;
+
+    return ant;
 }
 
 /**
@@ -332,58 +347,31 @@ void wireworld(void *data) {
  * white -> black, turn right
  * move ant forward
  */
-void langton(void *data) {
+void langtons_ant(void *data) {
 
-    struct langton_config *lc = (struct langton_config *) data;
+    struct automaton *ca = (struct automaton *) data;
 
-    struct ant *ant = lc->ant;
-    struct automaton *ca = lc->automaton;
-
-    int x = ant->x;
-    int y = ant->y;
-    int dx = ant->dx;
-    int dy = ant->dy;
+    int x = ca->ant->x;
+    int y = ca->ant->y;
+    int dx = ca->ant->dx;
+    int dy = ca->ant->dy;
 
     int offset = y * ca->len + x;
 
-    // int total_cells = (int) pow(ca->len, ca->dimension);
-
-    // int *new = calloc(total_cells, sizeof(int));
-    // memcpy(new, ca->cells, sizeof(int) * total_cells);
-
-    /*
-     *  a.b = |a||b| cos theta
-     *  a.b = 0 (orthogonal)
-     *
-     *  we have a, want b
-     *  ax.bx + ay.by = 0
-     *  bx = -(ay.by)/ax
-     *
-     *  |b| = 1 = sqrt(b.b) = pow(bx,2)+pow(by,2)
-     *  bx = sqrt(1 - pow(by,2))
-     *
-     *  [ALGEBRA]
-     *
-     *  by = +/- sqrt(1/(1+pow(ay,2)/pow(ax,2)))
-     */
-
-    int k;
-
-    switch (offset) {
+    switch (ca->cells[offset]) {
     case DEAD:
         ca->cells[offset] = ALIVE;
-        k = dx;
-        dx = -dy;
-        dy = k;
+        ca->ant->dx = dy;
+        ca->ant->dy = -dx;
         break;
     case ALIVE:
         ca->cells[offset] = DEAD;
-        k = dy;
-        dy = -dx;
-        dx = k;
+        ca->ant->dx = -dy;
+        ca->ant->dy = dx;
         break;
     }
 
-    ant += (dy*ca->len + dx);
+    ca->ant->x += ca->ant->dx;
+    ca->ant->y += ca->ant->dy;
 
 }

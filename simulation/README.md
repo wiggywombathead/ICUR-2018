@@ -21,10 +21,13 @@ Currently, it can simulate:
   * 4 - conductor
   * 5 - firing neuron
 * `LShift` - hold to draw a straight line from start to where you release
+* `Space` - step the simulation along one generation when paused
 
+* `Left/Right arrow keys` - decrease/increase speed
 * `LCtrl + [0-9]` - switch between different automata
 
 * `c` - clear the screen
+* `r` - reset the generation counter
 * `p` - pause/resume simulation
 * `h` - bring up help
 * `q` - quit

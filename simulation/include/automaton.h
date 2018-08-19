@@ -1,6 +1,7 @@
 #ifndef _AUTOMATON_H
 #define _AUTOMATON_H
 
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 
 struct automaton;
@@ -8,6 +9,11 @@ typedef void (*simulate_fn)(void *);
 
 enum direction {
     UP, RIGHT, DOWN, LEFT
+};
+
+struct ant {
+    int x, y;
+    int dx, dy;
 };
 
 struct automaton {
@@ -19,19 +25,12 @@ struct automaton {
     SDL_Rect    *rects;
     int         cell_width;
     int         cell_height;
-};
-
-struct ant {
-    int x, y;
-    int dx, dy;
-};
-
-struct langton_config {
     struct ant *ant;
-    struct automaton *automaton;
+    bool        is_langton;
 };
 
 struct automaton *init_automaton(int len, simulate_fn func, int d);
+struct ant *init_ant(int x, int y, int dx, int dy, struct automaton *);
 
 void rule_30(void *);
 void rule_90(void *);
@@ -39,6 +38,6 @@ void rule_110(void *);
 void brians_brain(void *);
 void game_of_life(void *);
 void wireworld(void *);
-void langton(void *);
+void langtons_ant(void *);
 
 #endif

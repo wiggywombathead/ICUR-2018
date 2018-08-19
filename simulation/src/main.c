@@ -5,9 +5,12 @@
 #include <time.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "global.h"
 #include "automaton.h"
+
+#define TXT_WIDTH 9
 
 #define max(a,b) ((a) >= (b) ? a : b)
 
@@ -23,10 +26,18 @@ const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
 SDL_Window *window;
 SDL_Renderer *renderer;
 
+SDL_Surface *surface;
+SDL_Texture *texture;
+SDL_Rect msg_rect;
+
 bool running = true;
 bool paused = false;
 bool step = false;
 int paintbrush = ALIVE;     /* the state with which to overwrite cell */
+
+/* simulation speed */
+int speed = 0;
+int gens = 0;
 
 struct automaton *rule30;
 struct automaton *rule90;
@@ -34,7 +45,7 @@ struct automaton *rule110;
 struct automaton *conway;
 struct automaton *brian;
 struct automaton *wires;
-struct automaton *lang;
+struct automaton *langton;
 
 struct automaton *active;
 
@@ -79,93 +90,100 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    srand(time(NULL));
+    if(TTF_Init() == -1) {
+        fprintf(stderr, "Error on TTF_Init(): %s\n", TTF_GetError());
+        exit(EXIT_FAILURE);
+    }
 
-    int *config = calloc(512, sizeof(int));
-    config[256] = 1;
+    int ticks = 0;
+    char gen_str[12];
+    int gen_len = 1;
+    int last_gen_len = gen_len;
 
-    rule30 = init_automaton(
-            512,
-            &rule_30,
-            1
-    );
+    /* text setup */
+    TTF_Font *font = TTF_OpenFont("consolas.ttf", 144);
+    if(!font) {
+        fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
+    }
+
+    SDL_Colour white = {255, 255, 255};
+
+    msg_rect.w = 1 * TXT_WIDTH;
+    msg_rect.h = 18;
+    msg_rect.x = WIN_WIDTH - msg_rect.w;
+    msg_rect.y = 0;
+
+    /* automata initialisation */
+    int *config = calloc(128*128, sizeof(int));
+
+    rule30 = init_automaton(512, &rule_30, 1);
     rule30->cells = config;
 
-    rule90 = init_automaton(
-            512,
-            &rule_90,
-            1
-    );
+    rule90 = init_automaton(512, &rule_90, 1);
     rule90->cells = config;
 
-    rule110 = init_automaton(
-            256,
-            &rule_110,
-            1
-    );
+    rule110 = init_automaton(256, &rule_110, 1);
     rule110->cells = config;
 
-    int *ww_conf = calloc(128*128, sizeof(int));
-    wires = init_automaton(
-            128,
-            &wireworld,
-            2
-    );
-    wires->cells = ww_conf;
+    wires = init_automaton(128, &wireworld, 2);
+    wires->cells = config;
 
-    int *gol_conf = calloc(128 * 128, sizeof(int));
-    conway = init_automaton(
-            128,
-            &game_of_life,
-            2
-    );
-    conway->cells = gol_conf;
+    conway = init_automaton(128, &game_of_life, 2);
+    conway->cells = config;
 
-    int *brain_conf = calloc(128*128, sizeof(int));
-    brian = init_automaton(
-            128,
-            &brians_brain,
-            2
-    );
-    brian->cells = brain_conf;
+    brian = init_automaton(128, &brians_brain, 2);
+    brian->cells = config;
 
-    lang = calloc(128*128, sizeof(int));
-    struct automaton *ant = init_automaton(
-            128,
-            &langton,
-            2
-    );
-    ant->cells = lang;
-    
+    langton = init_automaton(128, &langtons_ant, 2);
+    struct ant *ant = init_ant(64, 64, 1, 0, langton);
+    langton->cells = config;
+
     /* fps regulation */
     unsigned int frame_start;
     unsigned int frame_curr;
     unsigned int wait_time;
 
-    /* simulation speed */
-    int ticks = 0;
-
     /* main program execution */
-    active = brian;
+    active = langton;
     frame_start = SDL_GetTicks();
 
     while (running) {
 
         handle_input();
 
+        sprintf(gen_str, "%d", gens);
+        if ((gen_len = strlen(gen_str)) > last_gen_len) {
+            last_gen_len = gen_len;
+            msg_rect.w = gen_len * TXT_WIDTH;
+            msg_rect.x -= TXT_WIDTH;
+        }
+
+        surface = TTF_RenderText_Solid(font, gen_str, white);
+        texture = SDL_CreateTextureFromSurface(renderer, surface);
+
         /* render automaton */
         render(active);
 
         if (!paused) {
-            if (ticks > 3) {
+
+            if (ticks > speed) {
+
                 /* update automaton */
                 active->sim(active);
+
                 ticks = 0;
+                gens++;
+
+            } else {
+
+                ticks++;
+
             }
-            ticks++;
+
         } else {
             if (step) {
                 active->sim(active);
+                gens++;
                 step = !step;
             }
         }
@@ -185,6 +203,11 @@ int main() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
+    TTF_CloseFont(font);
+
+    TTF_Quit();
     SDL_Quit();
 
     return 0;
@@ -233,16 +256,21 @@ void render(struct automaton *ca) {
                 case CONDUCTOR:
                     SDL_SetRenderDrawColor(renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
                     break;
-                case ANT:
-                    SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
-                    break;
                 }
 
                 SDL_RenderFillRect(renderer, &ca->rects[offset]);
             }
         }
 
+        if (ca->is_langton) {
+            int offset = ca->ant->y * ca->len + ca->ant->x;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderFillRect(renderer, &ca->rects[offset]);
+        }
+
     }
+
+    SDL_RenderCopy(renderer, texture, NULL, &msg_rect);
 
     SDL_RenderPresent(renderer);
 }
@@ -297,15 +325,15 @@ void handle_input() {
             case SDLK_LCTRL:
                 ctrl = true;
                 break;
-            case SDLK_RIGHT:
+            case SDLK_SPACE:
                 step = true;
                 break;
-            case SDLK_p:
-                if (paused)
-                    printf("Resuming...\n");
-                else
-                    printf("Paused\n");
-                paused = !paused;
+            case SDLK_RIGHT:
+                speed--;
+                speed = speed < 0 ? 0 : speed;
+                break;
+            case SDLK_LEFT:
+                speed++;
                 break;
             case SDLK_c:
                 arr_size = pow(active->len,active->dimension) * sizeof(int);
@@ -315,9 +343,20 @@ void handle_input() {
                     DEAD,
                     arr_size
                 );
+                gens = 0;
+                break;
+            case SDLK_p:
+                if (paused)
+                    printf("Resuming...\n");
+                else
+                    printf("Paused\n");
+                paused = !paused;
                 break;
             case SDLK_q:
                 running = 0;
+                break;
+            case SDLK_r:
+                gens = 0;
                 break;
             case SDLK_0:
                 if (ctrl) {
