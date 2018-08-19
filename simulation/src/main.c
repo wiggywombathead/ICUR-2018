@@ -10,15 +10,7 @@
 #include "global.h"
 #include "automaton.h"
 
-#define TXT_WIDTH 9
-
 #define max(a,b) ((a) >= (b) ? a : b)
-
-/* TODO
- *  for langton's ant, pass ant coords in void * param (along with ca)
- *  render active->cells[ant] as an unused color e.g. red
- *  add ant coords to struct automaton ?
- */
 
 /* milliseconds for each frame to take */
 const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
