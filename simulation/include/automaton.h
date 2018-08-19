@@ -7,10 +7,6 @@
 struct automaton;
 typedef void (*simulate_fn)(void *);
 
-enum direction {
-    UP, RIGHT, DOWN, LEFT
-};
-
 struct ant {
     int x, y;
     int dx, dy;
@@ -32,9 +28,16 @@ struct automaton {
 struct automaton *init_automaton(int len, simulate_fn func, int d);
 struct ant *init_ant(int x, int y, int dx, int dy, struct automaton *);
 
+/* elementary cellular automata */
 void rule_30(void *);
+void rule_54(void *);
 void rule_90(void *);
 void rule_110(void *);
+void rule_150(void *);
+void rule_182(void *);
+void rule_232(void *);
+void rule_250(void *);
+
 void brians_brain(void *);
 void game_of_life(void *);
 void wireworld(void *);

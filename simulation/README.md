@@ -5,12 +5,22 @@ versions of this. It is written in C using SDL.
 
 ## Features
 Currently, it can simulate:
+
+#### Elementary automata
 * Rule 30
+* Rule 54
 * Rule 90
 * Rule 110
+* Rule 150
+* Rule 182
+* Rule 232
+* Rule 250
+
+#### 2D automata
 * Game of Life
 * WireWorld
 * Brian's Brain
+* Langton's Ant
 
 ## Controls
 * `m` - toggle between draw and simulate mode
@@ -36,4 +46,6 @@ Currently, it can simulate:
 SegFaults changing 1D automata to another 1D automaton more than once
 
 ## TODO
-* Langton's Ant (in progress)
+* von Neumann's automaton
+* Nobili's automaton
+* Langton loops

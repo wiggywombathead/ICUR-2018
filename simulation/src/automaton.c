@@ -88,8 +88,40 @@ void rule_30(void *data) {
 
     free(ca->cells);
     ca->cells = new;
-
 }
+
+/**
+ * 111 110 101 100 011 010 001 000
+ *  0   0   1   1   0   1   1   0
+ */
+void rule_54(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+   
+    /* create new array to compute states without changing current ones */
+    int *new = malloc(sizeof(int) * total_cells);
+
+    for (int i = 1; i < ca->len-1; i++) {
+        int a, b, c;
+        a = ca->cells[i-1];
+        b = ca->cells[i];
+        c = ca->cells[i+1];
+        
+        new[i] = (~a & b & ~c) | (~b & (a | c));
+    }
+
+    new[0] = ca->cells[0] ^ ca->cells[1];
+    new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
 
 /**
  * 111 110 101 100 011 010 001 000
@@ -116,7 +148,6 @@ void rule_90(void *data) {
 
     free(ca->cells);
     ca->cells = new;
-
 }
 
 /**
@@ -142,6 +173,113 @@ void rule_110(void *data) {
 
     new[0] = ca->cells[1] | (ca->cells[0] ^ ca->cells[1]);
     new[ca->len-1] = ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
+void rule_150(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+   
+    /* create new array to compute states without changing current ones */
+    int *new = malloc(sizeof(int) * total_cells);
+
+    for (int i = 1; i < ca->len-1; i++) {
+        int a, b, c;
+        a = ca->cells[i-1];
+        b = ca->cells[i];
+        c = ca->cells[i+1];
+        
+        new[i] = (c & ((a & b) | ~(a | b))) | (~c & (a ^ b));
+    }
+
+    new[0] = ca->cells[0] ^ ca->cells[1];
+    new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
+void rule_182(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+   
+    /* create new array to compute states without changing current ones */
+    int *new = malloc(sizeof(int) * total_cells);
+
+    for (int i = 1; i < ca->len-1; i++) {
+        int a, b, c;
+        a = ca->cells[i-1];
+        b = ca->cells[i];
+        c = ca->cells[i+1];
+        
+        new[i] = (~a & b & ~c) | (a & (~b | c)) | (~b & c);
+    }
+
+    new[0] = ca->cells[0] ^ ca->cells[1];
+    new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
+void rule_232(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+   
+    /* create new array to compute states without changing current ones */
+    int *new = malloc(sizeof(int) * total_cells);
+
+    for (int i = 1; i < ca->len-1; i++) {
+        int a, b, c;
+        a = ca->cells[i-1];
+        b = ca->cells[i];
+        c = ca->cells[i+1];
+
+        new[i] = (a & b) | (b & c) | (a & c);
+    }
+
+    new[0] = ca->cells[0] & ca->cells[1];
+    new[ca->len-1] = ca->cells[ca->len-2] & ca->cells[ca->len-1];
+
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
+void rule_250(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+   
+    /* create new array to compute states without changing current ones */
+    int *new = malloc(sizeof(int) * total_cells);
+
+    for (int i = 1; i < ca->len-1; i++) {
+        new[i] = ca->cells[i-1] | ca->cells[i+1];
+    }
+
+    new[0] = ca->cells[1];
+    new[ca->len-1] = ca->cells[ca->len-2];
 
     for (int i = 0; i < ca->len; i++) {
         ca->rects[i].y += ca->rects[i].h;
@@ -206,7 +344,6 @@ void brians_brain(void *data) {
 
     free(ca->cells);
     ca->cells = new;
-
 }
 
 void game_of_life(void *data) {
@@ -266,7 +403,6 @@ void game_of_life(void *data) {
 
     free(ca->cells);
     ca->cells = new;
-
 }
 
 /**
@@ -339,7 +475,6 @@ void wireworld(void *data) {
 
     free(ca->cells);
     ca->cells = new;
-
 }
 
 /**
@@ -373,5 +508,4 @@ void langtons_ant(void *data) {
 
     ca->ant->x += ca->ant->dx;
     ca->ant->y += ca->ant->dy;
-
 }

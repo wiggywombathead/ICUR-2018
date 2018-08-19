@@ -44,13 +44,12 @@
 \section{Introduction}
     A cellular automaton is a discrete model of computation which consists of a
     finite collection of ``cells'', each in one of a finite number of states.
-    The state of each of these cells may evolve over the discrete progression of
-    time in discrete steps, and may do so according to a deterministic set of
-    rules specifying the state to which each cell is to progress, taking into
-    account the states of cells in its neighbourhood. Their inherently discrete
-    nature allows for strong analogies to be made with digital computers, and
-    gifts them the ability to simulate digital processes and the potential to
-    solve problems in this area. 
+    The state of each of these cells may evolve over the progression of time in
+    discrete steps, and may do so according to a deterministic set of rules
+    based on the states of neighbouring cells. Their inherently discrete nature
+    allows for strong analogies to be made with digital computers, and gifts
+    them the ability to simulate digital processes and the potential to solve
+    problems in this area. 
     
     Consider the cellular automaton defined by the simple rule:
     \begin{equation}
@@ -161,11 +160,12 @@
     \end{table}
 
     Reading the bottom row of this transition table, we get the binary number
-    $01011010_2 = 90_{10}$, allowing us to name this rule set Rule 90. Using
-    this convention, we may now construct our own automata based solely on the
-    knowledge of its name (at least for elementary cellular automata). For
-    example, take Rule 110, introduced by Wolfram 1983 \cite{WolframRule110}. We
-    first convert $110_{10}$ to binary, and then use this to fill in the table
+    $01011010_{\text{bin}} = 90_{\text{dec}}$, allowing us to name this rule set
+    Rule 90. Using this convention, we may now construct our own automata based
+    solely on the knowledge of its name (at least for elementary cellular
+    automata). For example, take Rule 110, introduced by Wolfram 1983
+    \cite{WolframRule110}. We first convert $110_{10}$ to binary, and then use
+    this to fill in the table
     as above:
 
     \begin{table}[h]
@@ -230,6 +230,103 @@
     \end{figure}
 
     \subsection{Elementary cellular automata}
+    Elementary cellular automata are the simplest class of one-dimensional
+    cellular automata; each cell may be in one of two states, 0 or 1, and rule
+    sets only take into account the cell itself and its immediate neighbours
+    (the nearest cell left and right of the cell being computed). Since there
+    are a total of $2^3=8$ combinations of values for a neighbourhood of cells,
+    and each of these neighbourhoods causes a cell to move to one of two states
+    in the next generation, this means there are $2^8=256$ elementary cellular
+    automata. Their evolution is often illustrated by each progressive ``new
+    line'' showing the next generation of the automaton, as caused by applying
+    the rule set to the current generation.
+    
+    Two technically different automata may give rise to similar patterns, and
+    indeed many automata are equivalent to each other thanks to simple
+    transformations of theirunerlying geometry. The first of these
+    transformations is reflection in the vertical axis; the result of applying
+    this is known as the mirror rule \cite{elementary}. For example, take Rule
+    30. Each time some neighbourhood produces a live cell in Rule 30, let's take
+    this neighbourhood and reflect it in the vertical plane, giving the table
+    below:
+
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|c|c|}\hline
+            111 & 110 & 101 & 100 & 011 & 010 & 001 & 000   \\
+            \hline
+            0 & 0 & 0 & 1 & 1 & 1 & 1 & 0   \\
+            \hline
+            0 & 1 & 0 & 1 & 0 & 1 & 1 & 0   \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    The first line of the table shows the ruleset for Rule 30, while the line
+    below gives that of our new ruleset, made by applying the mirror rule to
+    Rule 30. Thus we get Rule 30's mirror rule Rule $01010110_{\text{bin}}$ =
+    Rule $86_{\text{dec}}$. Rules which generate the same ruleset under
+    mirroring are called amphichiral, and of the 256 elementary cellular
+    automata, 64 are so.
+
+    The second of these transformations is to exchange the roles of 0s and 1s in
+    the ruleset definition, and doing so is applying the complement rule
+    \cite{elementary}.  Again applying this to Rule 30, we get the table below
+    (note that the roles of 0s and 1s are exchanged in both the top and bottom
+    rows):
+
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|c|c|}\hline
+            000 & 001 & 010 & 011 & 100 & 101 & 110 & 111   \\
+            \hline
+            1 & 1 & 1 & 0 & 0 & 0 & 0 & 1   \\
+            \hline
+        \end{tabular}
+    \end{table}
+
+    So we arrive at Rule $10000111_{\text{bin}} = 135_{\text{dec}}$ as the
+    complement of Rule 30. There are 16 rules which are the same as their
+    complement.
+    Both of these rules can be applied at once to a ruleset, and the result is
+    Rule 149 when applied to Rule 30. There are 16 rules which are the same as
+    their mirrored complementary rules. There are 88 rules which are
+    inequivalent under these transformations \cite{elementary}.
+
+    \subsection{Wolfram classes}
+    Wolfram gives the following classes for categorising the behaviours of
+    different automata:
+
+    \begin{itemize}
+        \item Class One: rapidly converge to a uniform state e.g. Rule 0, 232
+        \item Class Two: rapidly converge to a repetitive or stable state e.g.
+            Rule 250
+        \item Class Three: appear to remain in a random state e.g. Rule 150, 182
+        \item Class Four: form areas of repetitive or stable states, but also
+            structures which interact in complicated ways e.g. Rule 54
+    \end{itemize}
+
+    Two of these 256 rules are particularly special, namely Rule 54 and 110,
+    both of which are Class 4 elementary cellular automata. Rule 110 has been
+    proven to be universal, or Turing complete, meaning it is theorectically
+    able to simulate any function. Meanwhile, it is so far unknown whether Rule
+    54 is capable of universal computation -- interacting structures form, but
+    it remains to been seen whether structures useful for computation can be
+    formed. Computational universality is discussed more in-depth later on.
+
+    \subsection{Two dimensional cellular automata}
+    Two dimensional cellular automata become a bit more interesting than their
+    dimensionally-deficient brethren. Rather than having a single row of cells
+    to consider at each generation, now a two-dimensional plane of cells is used
+    to compute the evolution of the automaton. Whereas elementary automata
+    looked only at the neighbourhood of $a_{i-1}, a_i,$ and $a_{i+1}$ when
+    applying the ruleset, two-dimensional automata have a wider choice. Two of
+    the most common types of neighbourhood to consider are the Moore
+    neighbourhood and the von Neumann neighbourhood. The former includes the 8
+    cells directly surrounding the current cell being considered, while the
+    latter only focuses on the four orthogonally ajacent cells. Ocassionally,
+    one may use the extended von Neumann neighbourhood. 
+
     \subsection{Life-like cellular automata}
     \subsection{Cyclic cellular automata}
 

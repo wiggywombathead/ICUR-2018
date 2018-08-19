@@ -32,11 +32,17 @@ int speed = 0;
 int gens = 0;
 
 struct automaton *rule30;
+struct automaton *rule54;
 struct automaton *rule90;
 struct automaton *rule110;
+struct automaton *rule150;
+struct automaton *rule182;
+struct automaton *rule232;
+struct automaton *rule250;
+
 struct automaton *conway;
-struct automaton *brian;
 struct automaton *wires;
+struct automaton *brian;
 struct automaton *langton;
 
 struct automaton *active;
@@ -105,17 +111,36 @@ int main() {
     msg_rect.x = WIN_WIDTH - msg_rect.w;
     msg_rect.y = 0;
 
+    srand(time(NULL));
+
     /* automata initialisation */
     int *config = calloc(128*128, sizeof(int));
+    for (int i = 0; i < 128*128; i++)
+        config[i] = rand() % 2;
 
     rule30 = init_automaton(512, &rule_30, 1);
     rule30->cells = config;
+
+    rule54 = init_automaton(256, &rule_54, 1);
+    rule54->cells = config;
 
     rule90 = init_automaton(512, &rule_90, 1);
     rule90->cells = config;
 
     rule110 = init_automaton(256, &rule_110, 1);
     rule110->cells = config;
+    
+    rule150 = init_automaton(256, &rule_150, 1);
+    rule150->cells = config;
+
+    rule182 = init_automaton(256, &rule_182, 1);
+    rule182->cells = config;
+
+    rule232 = init_automaton(256, &rule_232, 1);
+    rule232->cells = config;
+
+    rule250 = init_automaton(256, &rule_250, 1);
+    rule250->cells = config;
 
     wires = init_automaton(128, &wireworld, 2);
     wires->cells = config;
@@ -136,7 +161,7 @@ int main() {
     unsigned int wait_time;
 
     /* main program execution */
-    active = langton;
+    active = rule54;;
     frame_start = SDL_GetTicks();
 
     while (running) {
@@ -260,9 +285,10 @@ void render(struct automaton *ca) {
             SDL_RenderFillRect(renderer, &ca->rects[offset]);
         }
 
-    }
+        /* only show generations for 2D automata */
+        SDL_RenderCopy(renderer, texture, NULL, &msg_rect);
 
-    SDL_RenderCopy(renderer, texture, NULL, &msg_rect);
+    }
 
     SDL_RenderPresent(renderer);
 }

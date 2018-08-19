@@ -6,6 +6,8 @@
 
 #define FRAME_RATE 60
 
+#define TXT_WIDTH 9
+
 enum states {
 
     /* Game of Life */
