@@ -509,3 +509,127 @@ void langtons_ant(void *data) {
     ca->ant->x += ca->ant->dx;
     ca->ant->y += ca->ant->dy;
 }
+
+/**
+ * John von Neumann's CA
+ *
+ * States:
+ *  Ground state:
+ *      U
+ *
+ *  Sensitised states:
+ *      S
+ *      S0
+ *      S00
+ *      S000
+ *      S01
+ *      S1
+ *      S10
+ *      S11
+ *
+ *  Confluent states:
+ *      C00
+ *      C01
+ *      C10
+ *      C11
+ *
+ *  Ordinary transmission states:
+ *      Noe
+ *      Noq
+ *      Eoe
+ *      Eoq
+ *      Soe
+ *      Soq
+ *      Woe
+ *      Woq
+ *
+ *  Special transmission states:
+ *      Nse
+ *      Nsq
+ *      Ese
+ *      Esq
+ *      Sse
+ *      Ssq
+ *      Wse
+ *      Wsq
+ *
+ * Construction Rules
+ *  U => S
+ *  S -> S0
+ *      S0 -> S00
+ *          S00 -> S000
+ *              S000 -> Eoe
+ *              S000 => Noe
+ *          S00 => Woe
+ *      S0 => S01
+ *          S01 -> Soe
+ *          S01 => Ese
+ *  S => S1
+ *      S1 -> S10
+ *          S10 -> Nse
+ *          S10 => Wse
+ *      S1 => S11
+ *          S11 -> Sse
+ *          S11 => C00
+ *
+ * Destruction Rules
+ *  special => confluent: confluent ~> U
+ *  special => ordinary: ordinary ~> U
+ *  ordinary => special: special ~> U
+ */
+
+void von_neumanns(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+
+    int *new = calloc(total_cells, sizeof(int));
+    memcpy(new, ca->cells, sizeof(int) * total_cells);
+
+    for (int i = 0; i < ca->len; i++) {
+        for (int  j = 0; j < ca->len; j++) {
+
+            int curr = i * ca->len + j;
+            int neighbourhood[4];
+
+            if (i > 0)
+                neighbourhood[0] = ca->cells[curr - ca->len];
+
+            if (j > 0)
+                neighbourhood[1] = ca->cells[curr - 1];
+
+            if (j < ca->len-1)
+                neighbourhood[2] = ca->cells[curr + 1];
+
+            if (i < ca->len-1)
+                neighbourhood[3] = ca->cells[curr + ca->len];
+
+            switch(ca->cells[curr]) {
+            case Noe:
+            case Noq:
+            case Eoe:
+            case Eoq:
+            case Soe:
+            case Soq:
+            case Woe:
+            case Woq:
+            case Noe:
+            case Noq:
+            case Eoe:
+            case Eoq:
+            case Soe:
+            case Soq:
+            case Woe:
+            case Woq:
+                if (neighbourhood[0] == Soe || neighbourhood[0] == Sse)
+                    new[curr] = 
+
+
+            }
+
+        }
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}

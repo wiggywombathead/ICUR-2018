@@ -48,4 +48,5 @@ SegFaults changing 1D automata to another 1D automaton more than once
 ## TODO
 * von Neumann's automaton
 * Nobili's automaton
+* Codd's automaton
 * Langton loops

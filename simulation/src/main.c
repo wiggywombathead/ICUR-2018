@@ -161,7 +161,7 @@ int main() {
     unsigned int wait_time;
 
     /* main program execution */
-    active = rule54;;
+    active = rule30;
     frame_start = SDL_GetTicks();
 
     while (running) {

@@ -49,7 +49,7 @@
     based on the states of neighbouring cells. Their inherently discrete nature
     allows for strong analogies to be made with digital computers, and gifts
     them the ability to simulate digital processes and the potential to solve
-    problems in this area. 
+    problems in this area.
     
     Consider the cellular automaton defined by the simple rule:
     \begin{equation}
@@ -165,8 +165,7 @@
     solely on the knowledge of its name (at least for elementary cellular
     automata). For example, take Rule 110, introduced by Wolfram 1983
     \cite{WolframRule110}. We first convert $110_{10}$ to binary, and then use
-    this to fill in the table
-    as above:
+    this to fill in the table as above:
 
     \begin{table}[h]
         \begin{minipage}{.5\linewidth}
@@ -299,9 +298,10 @@
 
     \begin{itemize}
         \item Class One: rapidly converge to a uniform state e.g. Rule 0, 232
-        \item Class Two: rapidly converge to a repetitive or stable state e.g.
+        \item Class Two: rapidly converge to a stable or oscillating state e.g.
             Rule 250
-        \item Class Three: appear to remain in a random state e.g. Rule 150, 182
+        \item Class Three: appear to evolve in a chaotic fashion e.g. Rule 30,
+            150, 182
         \item Class Four: form areas of repetitive or stable states, but also
             structures which interact in complicated ways e.g. Rule 54
     \end{itemize}
@@ -320,17 +320,50 @@
     to consider at each generation, now a two-dimensional plane of cells is used
     to compute the evolution of the automaton. Whereas elementary automata
     looked only at the neighbourhood of $a_{i-1}, a_i,$ and $a_{i+1}$ when
-    applying the ruleset, two-dimensional automata have a wider choice. Two of
-    the most common types of neighbourhood to consider are the Moore
-    neighbourhood and the von Neumann neighbourhood. The former includes the 8
-    cells directly surrounding the current cell being considered, while the
-    latter only focuses on the four orthogonally ajacent cells. Ocassionally,
-    one may use the extended von Neumann neighbourhood. 
+    applying the set of rules, two-dimensional automata typically have a larger
+    neighbourhood to consider. Two of the most common types of neighbourhood are
+    the Moore neighbourhood and the von Neumann neighbourhood
+    \cite{neighbourhoods}. The former includes the 8 cells directly surrounding
+    the current cell being considered, while the latter only focuses on the four
+    orthogonally ajacent cells. Ocassionally, one may use the extended von
+    Neumann neighbourhood, for which the next four closest orthogonally adjacent
+    cells are also included.
+
+    Using a Moore neighbourhood and a set of states of size $k$, we can see that
+    the total number of configurations for one particular neighbourhood is
+    $k^9$, as each of the nine cells included in the neighbourhood may be in one
+    of $k$ states. For an automaton such as Conway's Game of Life, where each
+    cell is either alive or dead and a moore neighbourhood is used, there are
+    $2^9=512$ ways to configure one of these neighbourhoods alone. The general
+    equation for the number of automata for a given neighbourhood and number of
+    possible states is $k^{k^n}$, where $k$ is the number of possible states and
+    $n$ is the size of the neighbourhood used when determining the automaton's
+    evolution between time steps (including the cell being computed); in the
+    case of a two-dimensional automaton using two states and a Moore
+    neighbourhood (such as Game of Life), there are $2^{2^9}$ possible automata
+    \cite{num_rules}.
+
+    \subsection{Game of Life}
+    At this point it makes sense to talk a bit more about Conway's Game of Life.
+    It was invented in 1970 by the British mathematician John Conway, after
+    developing an interest in them after their introduction by John von Neumann
+    in the late 1940s, who aimed to discover a hypothetical machine that was
+    capable of recreating itself. Von Neumann was able to achieve this goal
+    using a complex automaton, with 29 states and complicated rules to do so
+    \cite{self-reproducing}. Von Neumann's automaton is discussed in more depth
+    later. Conway's Game of Life was thus Conway's way of simplifying von
+    Neumann's ideas, and in fact, the Game of Life is able to simulate the Game
+    of Life itself and is in fact capable of universal computation.
 
     \subsection{Life-like cellular automata}
+
     \subsection{Cyclic cellular automata}
 
 \section{Examples}
+    \subsection{Von Neumann's automaton}
+    \subsection{Game of Life}
+    \subsection{Langton's Ant}
+    \subsection{WireWorld}
 \section{Applications}
 \section{Computational Universality}
 \section{Firing Squad Synchronisation Problem}
