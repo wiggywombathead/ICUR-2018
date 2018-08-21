@@ -343,19 +343,58 @@
     neighbourhood (such as Game of Life), there are $2^{2^9}$ possible automata
     \cite{num_rules}.
 
-    \subsection{Game of Life}
+    \subsection{Game of Life and Life-like automata}
     At this point it makes sense to talk a bit more about Conway's Game of Life.
     It was invented in 1970 by the British mathematician John Conway, after
     developing an interest in them after their introduction by John von Neumann
     in the late 1940s, who aimed to discover a hypothetical machine that was
-    capable of recreating itself. Von Neumann was able to achieve this goal
-    using a complex automaton, with 29 states and complicated rules to do so
-    \cite{self-reproducing}. Von Neumann's automaton is discussed in more depth
-    later. Conway's Game of Life was thus Conway's way of simplifying von
+    capable of recreating itself \cite{GameOfLife}. Von Neumann was able to
+    achieve this goal using a complex automaton, with 29 states and complicated
+    rules to do so \cite{VonNeumannCA}. Von Neumann's automaton is discussed in
+    more depth later. Conway's Game of Life was thus his way of simplifying von
     Neumann's ideas, and in fact, the Game of Life is able to simulate the Game
-    of Life itself and is in fact capable of universal computation.
+    of Life itself and is capable of universal computation.
 
-    \subsection{Life-like cellular automata}
+    The rules for Game of Life are as follows:
+
+    \begin{itemize}
+        \item If the current cell $a_{i,j}^t$ is dead, then:
+            \begin{itemize}
+                \item if the number of alive surrounding cells is 2 or 3,
+                    then $a_{i,j}$ will become alive in the next generation
+                \item else $a_{i,j}$ remains dead
+            \end{itemize}
+        \item If the current cell $a_{i,j}^t$ is alive, then:
+            \begin{itemize}
+                \item if the number of alive surrounding cells is less than 2,
+                    then $a_{i,j}$ dies as if through isolation
+                \item if the number of alive surrounding cells is greater than
+                    3, then $a_{i,j}$ dies as if through overcrowding
+                \item else $a_{i,j}$ lives on to the next generation
+            \end{itemize}
+    \end{itemize}
+
+    There are many fascinating structures which arise out of these simple rules,
+    and can be classed as follows:
+
+    \begin{itemize}
+        \item Still Life - patterns that do not change at all from one
+            generation to the next
+        \item Oscillators - patterns which generate some sort of cycle of
+            patterns in a fixed place with a specific period
+        \item Gliders and Spaceships - patterns which cycle through some finite
+            set of patterns, but whose position is shifted each time, appeaing
+            to move
+        \item Guns - repeating patterns which produce a spaceship after a finite
+            number of generations
+        \item Puffers - moving patterns which leave a trail of stable or
+            oscillating debris at regular intervals
+        \item Rakes - moving patterns which emit spaceships at regular intervals
+            as they move
+        \item Breeders - oscillating patterns which deposit guns at regular
+            intervals. Unline guns, puffers, and rakes, who each have a linear
+            growth rate, breeders exhibit exponential growth rate
+    \end{itemize}
 
     \subsection{Cyclic cellular automata}
 
