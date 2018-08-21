@@ -613,16 +613,16 @@ void von_neumanns(void *data) {
             case Soq:
             case Woe:
             case Woq:
-            case Noe:
-            case Noq:
-            case Eoe:
-            case Eoq:
-            case Soe:
-            case Soq:
-            case Woe:
-            case Woq:
+            case Nse:
+            case Nsq:
+            case Ese:
+            case Esq:
+            case Sse:
+            case Ssq:
+            case Wse:
+            case Wsq:
                 if (neighbourhood[0] == Soe || neighbourhood[0] == Sse)
-                    new[curr] = 
+                    new[curr] = 1;
 
 
             }

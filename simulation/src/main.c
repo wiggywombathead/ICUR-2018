@@ -18,10 +18,6 @@ const int FRAME_INTERVAL = 1 * 1000 / FRAME_RATE;
 SDL_Window *window;
 SDL_Renderer *renderer;
 
-SDL_Surface *surface;
-SDL_Texture *texture;
-SDL_Rect msg_rect;
-
 bool running = true;
 bool paused = false;
 bool step = false;
@@ -49,6 +45,8 @@ struct automaton *active;
 
 void render(struct automaton *);
 void handle_input(void);
+
+void switch_automaton(struct automaton *);
 
 float lerp(float, float, float);
 int diag(int, int, int, int);
@@ -104,55 +102,46 @@ int main() {
         fprintf(stderr, "TTF_OpenFont: %s\n", TTF_GetError());
     }
 
-    SDL_Colour white = {255, 255, 255};
-
-    msg_rect.w = 1 * TXT_WIDTH;
-    msg_rect.h = 18;
-    msg_rect.x = WIN_WIDTH - msg_rect.w;
-    msg_rect.y = 0;
-
     srand(time(NULL));
 
     /* automata initialisation */
-    int *config = calloc(128*128, sizeof(int));
-    for (int i = 0; i < 128*128; i++)
-        config[i] = rand() % 2;
+    int *config = calloc(400*400, sizeof(int));
 
-    rule30 = init_automaton(512, &rule_30, 1);
+    rule30 = init_automaton(400, &rule_30, 1);
     rule30->cells = config;
 
-    rule54 = init_automaton(256, &rule_54, 1);
+    rule54 = init_automaton(400, &rule_54, 1);
     rule54->cells = config;
 
-    rule90 = init_automaton(512, &rule_90, 1);
+    rule90 = init_automaton(400, &rule_90, 1);
     rule90->cells = config;
 
-    rule110 = init_automaton(256, &rule_110, 1);
+    rule110 = init_automaton(400, &rule_110, 1);
     rule110->cells = config;
     
-    rule150 = init_automaton(256, &rule_150, 1);
+    rule150 = init_automaton(400, &rule_150, 1);
     rule150->cells = config;
 
-    rule182 = init_automaton(256, &rule_182, 1);
+    rule182 = init_automaton(400, &rule_182, 1);
     rule182->cells = config;
 
-    rule232 = init_automaton(256, &rule_232, 1);
+    rule232 = init_automaton(400, &rule_232, 1);
     rule232->cells = config;
 
-    rule250 = init_automaton(256, &rule_250, 1);
+    rule250 = init_automaton(400, &rule_250, 1);
     rule250->cells = config;
 
-    wires = init_automaton(128, &wireworld, 2);
+    wires = init_automaton(200, &wireworld, 2);
     wires->cells = config;
 
-    conway = init_automaton(128, &game_of_life, 2);
+    conway = init_automaton(200, &game_of_life, 2);
     conway->cells = config;
 
-    brian = init_automaton(128, &brians_brain, 2);
+    brian = init_automaton(200, &brians_brain, 2);
     brian->cells = config;
 
-    langton = init_automaton(128, &langtons_ant, 2);
-    struct ant *ant = init_ant(64, 64, 1, 0, langton);
+    langton = init_automaton(200, &langtons_ant, 2);
+    struct ant *ant = init_ant(100, 100, 1, 1, langton);
     langton->cells = config;
 
     /* fps regulation */
@@ -161,22 +150,12 @@ int main() {
     unsigned int wait_time;
 
     /* main program execution */
-    active = rule30;
+    active = conway;
     frame_start = SDL_GetTicks();
 
     while (running) {
 
         handle_input();
-
-        sprintf(gen_str, "%d", gens);
-        if ((gen_len = strlen(gen_str)) > last_gen_len) {
-            last_gen_len = gen_len;
-            msg_rect.w = gen_len * TXT_WIDTH;
-            msg_rect.x -= TXT_WIDTH;
-        }
-
-        surface = TTF_RenderText_Solid(font, gen_str, white);
-        texture = SDL_CreateTextureFromSurface(renderer, surface);
 
         /* render automaton */
         render(active);
@@ -220,14 +199,17 @@ int main() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
 
-    SDL_DestroyTexture(texture);
-    SDL_FreeSurface(surface);
-    TTF_CloseFont(font);
-
-    TTF_Quit();
     SDL_Quit();
 
     return 0;
+}
+
+void switch_automaton(struct automaton *new) {
+
+    new->cells = active->cells;
+    bzero(new->cells, sizeof(int));
+    active = new;
+
 }
 
 void render(struct automaton *ca) {
@@ -285,8 +267,16 @@ void render(struct automaton *ca) {
             SDL_RenderFillRect(renderer, &ca->rects[offset]);
         }
 
+        SDL_SetRenderDrawColor(renderer, 16, 16, 16, SDL_ALPHA_OPAQUE);
+        for (int i = 1; i < ca->len; i++) {
+            int x = i * ca->cell_width;
+            int y = i * ca->cell_height;
+
+            SDL_RenderDrawLine(renderer, x, 0, x, WIN_HEIGHT);
+            SDL_RenderDrawLine(renderer, 0, y, WIN_WIDTH, y);
+        }
+
         /* only show generations for 2D automata */
-        SDL_RenderCopy(renderer, texture, NULL, &msg_rect);
 
     }
 
@@ -385,7 +375,7 @@ void handle_input() {
                 break;
             case SDLK_1:
                 if (ctrl) {
-                    active = conway;
+                    switch_automaton(conway);
                     printf("Welcome to the Game of Life!\n");
                 } else {
                     paintbrush = DEAD;
@@ -393,7 +383,7 @@ void handle_input() {
                 break;
             case SDLK_2:
                 if (ctrl) {
-                    active = wires;
+                    switch_automaton(wires);
                     printf("Welcome to WireWorld!\n");
                 } else {
                     paintbrush = ALIVE;
@@ -401,7 +391,7 @@ void handle_input() {
                 break;
             case SDLK_3:
                 if (ctrl) {
-                    active = brian;
+                    switch_automaton(brian);
                     printf("Welcome to Brian's Brain!\n");
                 } else {
                     paintbrush = HEAD;
@@ -409,25 +399,19 @@ void handle_input() {
                 break;
             case SDLK_4:
                 if (ctrl) {
-                    active = rule30;
-                    printf("Welcome to Rule 30!\n");
+                    switch_automaton(langton);
+                    printf("Welcome to Langton's Ant!\n");
                 } else {
                     paintbrush = CONDUCTOR;
                 }
                 break;
             case SDLK_5:
                 if (ctrl) {
-                    active = rule90;
-                    printf("Welcome to Rule 90!\n");
                 } else {
                     paintbrush = FIRING;
                 }
                 break;
             case SDLK_6:
-                if (ctrl) {
-                    active = rule110;
-                    printf("Welcome to Rule 110\n");
-                }
                 break;
             case SDLK_7:
                 break;
