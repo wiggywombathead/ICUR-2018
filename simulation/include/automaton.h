@@ -7,6 +7,51 @@
 struct automaton;
 typedef void (*simulate_fn)(void *);
 
+enum states {
+
+    /* Game of Life */
+    DEAD = 0,
+    ALIVE = 1,
+
+    /* BRIAN'S BRAIN */
+    FIRING,
+    DYING,
+    
+    /* WireWorld */
+    HEAD,
+    TAIL,
+    CONDUCTOR,
+
+    /* Langton's Ant */
+    ANT,
+
+    /* von Neumann's */
+    NORTH       = 0x0,
+    EAST        = 0x1,
+    SOUTH       = 0x2,
+    WEST        = 0x3,
+    ORDINARY    = 0x4,
+    SPECIAL     = 0x8,
+    QUIESCENT   = 0x10,
+    EXCITED     = 0x20,
+
+    GROUND,
+    S,
+    S0,
+    S00,
+    S000,
+    S01,
+    S1,
+    S10,
+    S11,
+
+    C00,
+    C01,
+    C10,
+    C11,
+
+};
+
 struct ant {
     int x, y;
     int dx, dy;

@@ -34,16 +34,18 @@ Currently, it can simulate:
 * `Space` - step the simulation along one generation when paused
 
 * `Left/Right arrow keys` - decrease/increase speed
-* `LCtrl + [0-9]` - switch between different automata
+* `LCtrl + [0-9]` - switch between different 2D automata
+* `e` + prompt - switch to elementary automaton
 
 * `c` - clear the screen
+* `g` - toggle grid overlay
 * `r` - reset the generation counter
 * `p` - pause/resume simulation
 * `h` - bring up help
 * `q` - quit
 
-## Notes
-SegFaults changing 1D automata to another 1D automaton more than once
+## Bugs
+Don't pause, switch from 1D to 2D, then clear the automaton (??)
 
 ## TODO
 * von Neumann's automaton

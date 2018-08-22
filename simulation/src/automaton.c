@@ -86,7 +86,6 @@ void rule_30(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -118,7 +117,6 @@ void rule_54(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -146,7 +144,6 @@ void rule_90(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -178,7 +175,6 @@ void rule_110(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -206,7 +202,6 @@ void rule_150(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -234,7 +229,6 @@ void rule_182(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -262,7 +256,6 @@ void rule_232(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -285,7 +278,6 @@ void rule_250(void *data) {
         ca->rects[i].y += ca->rects[i].h;
     }
 
-    free(ca->cells);
     ca->cells = new;
 }
 
@@ -605,26 +597,26 @@ void von_neumanns(void *data) {
                 neighbourhood[3] = ca->cells[curr + ca->len];
 
             switch(ca->cells[curr]) {
-            case Noe:
-            case Noq:
-            case Eoe:
-            case Eoq:
-            case Soe:
-            case Soq:
-            case Woe:
-            case Woq:
-            case Nse:
-            case Nsq:
-            case Ese:
-            case Esq:
-            case Sse:
-            case Ssq:
-            case Wse:
-            case Wsq:
-                if (neighbourhood[0] == Soe || neighbourhood[0] == Sse)
-                    new[curr] = 1;
+            case NORTH | ORDINARY | QUIESCENT:
+            case NORTH | ORDINARY | EXCITED:
+            case NORTH | SPECIAL | QUIESCENT:
+            case NORTH | SPECIAL | EXCITED:
 
+            case EAST | ORDINARY | QUIESCENT:
+            case EAST | ORDINARY | EXCITED:
+            case EAST | SPECIAL | QUIESCENT:
+            case EAST | SPECIAL | EXCITED:
 
+            case SOUTH | ORDINARY | QUIESCENT:
+            case SOUTH | ORDINARY | EXCITED:
+            case SOUTH | SPECIAL | QUIESCENT:
+            case SOUTH | SPECIAL | EXCITED:
+
+            case WEST | ORDINARY | QUIESCENT:
+            case WEST | ORDINARY | EXCITED:
+            case WEST | SPECIAL | QUIESCENT:
+            case WEST | SPECIAL | EXCITED:
+                ;
             }
 
         }
