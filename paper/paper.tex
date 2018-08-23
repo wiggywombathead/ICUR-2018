@@ -311,8 +311,12 @@
     proven to be universal, or Turing complete, meaning it is theorectically
     able to simulate any function. Meanwhile, it is so far unknown whether Rule
     54 is capable of universal computation -- interacting structures form, but
-    it remains to been seen whether structures useful for computation can be
-    formed. Computational universality is discussed more in-depth later on.
+    it remains to been seen whether structures useful for computation arise.
+    Computational universality is discussed more in-depth later on.
+
+    There have been attempts to classify automata more rigorously, and Culik and
+    Yu proposed four well-defined classes for such a task; membership in such
+    classes has, however, been shown to be undecidable \cite{CulikYuMembership}.
 
     \subsection{Two dimensional cellular automata}
     Two dimensional cellular automata become a bit more interesting than their
@@ -396,15 +400,86 @@
             growth rate, breeders exhibit exponential growth rate
     \end{itemize}
 
-    \subsection{Cyclic cellular automata}
+    Conway originally believed that no pattern could grow infinitely, i.e. for
+    the population to grow past any upper limit for some initial configuration
+    with finite number of alive cells, and offered fifty dollars to the first
+    person who could prove or disprove this conjecture before the end of 1970.
+    In November of that year a team from the Massachusetts Institute of
+    Technology, led by Bill Gosper, found a structure which produced gliders
+    every 30 generations, and called it the Gosper Glider Gun. Later on, smaller
+    patterns were found to produce infinite growth, one of which has been proven
+    to be minimal, starting off with only ten alive cells
+    \cite{infiniteGrowth}. More of what this means for the computational power
+    of Game of Life, as well as other automata, will be discussed under
+    Computational Universality.
+
+    A cellular automaton is Life-like (similar to Game of Life) if it meets the
+    following criteria \cite{LifeLike}:
+
+    \begin{itemize}
+        \item it is two-dimensional
+        \item each cell of the automaton may be in one of two states, alive or
+            dead (or on or off) at any point
+        \item a cell's Moore neighbourhood is used to compute the cell's state
+            in the next generation
+        \item in each time step of the automaton, the next state of the cell can
+            be expressed as a funciton of the number of adjacent cells that are
+            in the alive state and of the cell's own state
+    \end{itemize}
+
+    As with elementary cellular automata, it is helpful to refer to specific
+    rulesets in a more generalised way. Where this was using the rule's binary
+    encoding for one-dimensional automata, one such convention for
+    two-dimensional automat is using a string $Bx/Sy$, where $x$ and $y$ are a
+    sequence of digits, 0 to 8, in ascending order. The presence of a digit $d$
+    in $x$ means that a dead cell with $d$ alive neighbours will become alive in
+    the next generation, while the presence of $d$ in $y$ signifies that an
+    alive cell with $d$ alive neighbours will continue to live on to the next
+    generation. For example, Game of Life is denoted B3/S23: a dead cell is
+    \textbf{B}orn if there are exactly 3 alive neighbours surrounding it, and
+    and alive cell \textbf{S}urvives if there are two or three alive cells
+    surrounding it.
+
+    \begin{figure}[h]
+        \begin{centering}
+            \begin{tabular}{cc}
+                \includegraphics[width=2in]{replicator1.png} &
+                \includegraphics[width=2in]{replicator2.png} \\
+                %(a) first & (b) second \\[6pt]
+                \includegraphics[width=2in]{replicator3.png} &
+                \includegraphics[width=2in]{replicator4.png} \\
+                %(c) third & (d) fourth \\[6pt]
+                %\multicolumn{2}{c}{\includegraphics[width=65mm]{it} }\\
+                %\multicolumn{2}{c}{(e) fifth}
+            \end{tabular}
+            \caption{Replicator (B1357/S1357) replicating itself over the course of
+            56 generations}
+        \end{centering}
+    \end{figure}
+
+    \subsection{Other types of automata}
+    \subsubsection{Reversible cellular automata}
+    A cellular automaton is reversible if, for every configuration of the
+    automaton, exactly one configuration that causes it (its preimage). If we
+    consider the automaton as a function that maps configurations to
+    configurations, then for a reversible automaton this function would be
+    bijective. Where this is not the case, where not every configuration has a
+    preimage, these configurations without preimages are called Garden of Eden
+    patterns \cite{GardenOfEden}.
+    \subsubsection{Totalistic cellular automata}
+    \subsubsection{Proabilistic cellular automata}
+    \subsubsection{Cyclic cellular automata}
+
+\section{Computational Universality}
 
 \section{Examples}
     \subsection{Von Neumann's automaton}
     \subsection{Game of Life}
+    \subsection{Fractran}
     \subsection{Langton's Ant}
     \subsection{WireWorld}
 \section{Applications}
-\section{Computational Universality}
+    \subsection{Cryptography}
 \section{Firing Squad Synchronisation Problem}
 \section{Majority Problem}
 

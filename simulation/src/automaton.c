@@ -503,6 +503,163 @@ void langtons_ant(void *data) {
 }
 
 /**
+ * B1357/S1357
+ */
+void replicator(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+
+    int *new = calloc(total_cells, sizeof(int));
+    memcpy(new, ca->cells, sizeof(int) * total_cells);
+
+    for (int i = 0; i < ca->len; i++) {
+        for (int  j = 0; j < ca->len; j++) {
+
+            int curr = i * ca->len + j;
+            int alive = 0;
+
+            if (i > 0 && j > 0)
+                alive += ca->cells[curr - ca->len - 1];
+
+            if (i > 0)
+                alive += ca->cells[curr - ca->len];
+
+            if (i > 0 && j < ca->len-1)
+                alive += ca->cells[curr - ca->len + 1];
+
+            if (j > 0)
+                alive += ca->cells[curr - 1];
+
+            if (j < ca->len-1)
+                alive += ca->cells[curr + 1];
+
+            if (i < ca->len-1 && j > 0)
+                alive += ca->cells[curr + ca->len - 1];
+
+            if (i < ca->len-1)
+                alive += ca->cells[curr + ca->len];
+
+            if (i < ca->len-1 && j < ca->len-1)
+                alive += ca->cells[curr + ca->len + 1];
+
+            if (ca->cells[curr] == ALIVE) {
+
+                /* survival / death */
+                switch (alive) {
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                    new[curr] = ALIVE;
+                    break;
+                default:
+                    new[curr] = DEAD;
+                }
+
+            } else {
+
+                /* reproduction */
+                switch (alive) {
+                case 1:
+                case 3:
+                case 5:
+                case 7:
+                    new[curr] = ALIVE;
+                    break;
+                default:
+                    new[curr] = DEAD;
+                }
+
+            }
+
+        }
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
+/**
+ * B35678/S5678
+ */
+void diamoeba(void *data) {
+
+    struct automaton *ca = (struct automaton *) data;
+    int total_cells = (int) pow(ca->len, ca->dimension);
+
+    int *new = calloc(total_cells, sizeof(int));
+    memcpy(new, ca->cells, sizeof(int) * total_cells);
+
+    for (int i = 0; i < ca->len; i++) {
+        for (int  j = 0; j < ca->len; j++) {
+
+            int curr = i * ca->len + j;
+            int alive = 0;
+
+            if (i > 0 && j > 0)
+                alive += ca->cells[curr - ca->len - 1];
+
+            if (i > 0)
+                alive += ca->cells[curr - ca->len];
+
+            if (i > 0 && j < ca->len-1)
+                alive += ca->cells[curr - ca->len + 1];
+
+            if (j > 0)
+                alive += ca->cells[curr - 1];
+
+            if (j < ca->len-1)
+                alive += ca->cells[curr + 1];
+
+            if (i < ca->len-1 && j > 0)
+                alive += ca->cells[curr + ca->len - 1];
+
+            if (i < ca->len-1)
+                alive += ca->cells[curr + ca->len];
+
+            if (i < ca->len-1 && j < ca->len-1)
+                alive += ca->cells[curr + ca->len + 1];
+
+            if (ca->cells[curr] == ALIVE) {
+
+                /* survival / death */
+                switch (alive) {
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    new[curr] = ALIVE;
+                    break;
+                default:
+                    new[curr] = DEAD;
+                }
+
+            } else {
+
+                /* reproduction */
+                switch (alive) {
+                case 3:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                    new[curr] = ALIVE;
+                    break;
+                default:
+                    new[curr] = DEAD;
+                }
+
+            }
+
+        }
+    }
+
+    free(ca->cells);
+    ca->cells = new;
+}
+
+/**
  * John von Neumann's CA
  *
  * States:
@@ -582,19 +739,35 @@ void von_neumanns(void *data) {
         for (int  j = 0; j < ca->len; j++) {
 
             int curr = i * ca->len + j;
+
             int neighbourhood[4];
+            int required_dir[] = {SOUTH, WEST, NORTH, EAST};
 
-            if (i > 0)
+            int dir;
+
+            if (i > 0) {
                 neighbourhood[0] = ca->cells[curr - ca->len];
+            } else {
+                neighbourhood[0] = -1;
+            }
 
-            if (j > 0)
+            if (j > 0) {
                 neighbourhood[1] = ca->cells[curr - 1];
+            } else {
+                neighbourhood[1] = -1;
+            }
 
-            if (j < ca->len-1)
+            if (j < ca->len-1) {
                 neighbourhood[2] = ca->cells[curr + 1];
+            } else {
+                neighbourhood[2] = -1;
+            }
 
-            if (i < ca->len-1)
+            if (i < ca->len-1) {
                 neighbourhood[3] = ca->cells[curr + ca->len];
+            } else {
+                neighbourhood[3] = -1;
+            }
 
             switch(ca->cells[curr]) {
             case NORTH | ORDINARY | QUIESCENT:
@@ -616,7 +789,17 @@ void von_neumanns(void *data) {
             case WEST | ORDINARY | EXCITED:
             case WEST | SPECIAL | QUIESCENT:
             case WEST | SPECIAL | EXCITED:
-                ;
+                dir = ca->cells[curr] & 0x3;
+                for (int i = 0; i < 4; i++) {
+                    int input_dir = neighbourhood[i] & 0x3;
+                    int is_excited = neighbourhood[i] & EXCITED;
+
+                    if (input_dir == required_dir[i] && is_excited) {
+                        new[curr] = EXCITED;
+                        break;
+                    }
+                }
+
             }
 
         }

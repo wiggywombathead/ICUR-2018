@@ -10,6 +10,7 @@
 #include "global.h"
 #include "automaton.h"
 
+#define AUTOMATA 6
 #define max(a,b) ((a) >= (b) ? a : b)
 
 /* milliseconds for each frame to take */
@@ -43,17 +44,24 @@ struct automaton *rule182;
 struct automaton *rule232;
 struct automaton *rule250;
 
-struct automaton *conway;
-struct automaton *wires;
+struct automaton *amoeboid;
 struct automaton *brian;
+struct automaton *conway;
 struct automaton *langton;
+struct automaton *replicate;
+struct automaton *wires;
+
+struct automaton *automata[6];
+int current_ca = 0;
 
 struct automaton *active;
 
+void switch_to_automaton(struct automaton *);
+int switch_to_elem(int);
+
 void render(struct automaton *);
 void handle_input(void);
-
-void switch_automaton(struct automaton *);
+void print_message(int);
 
 float lerp(float, float, float);
 int diag(int, int, int, int);
@@ -146,19 +154,32 @@ int main(int argc, char *argv[]) {
     rule250 = init_automaton(SIZE_1D, &rule_250, 1);
     rule250->cells = config_1d;
 
-    wires = init_automaton(SIZE_2D, &wireworld, 2);
-    wires->cells = config;
+    amoeboid = init_automaton(SIZE_2D, &diamoeba, 2);
+    amoeboid->cells = config;
+
+    brian = init_automaton(SIZE_2D, &brians_brain, 2);
+    brian->cells = config;
 
     conway = init_automaton(SIZE_2D, &game_of_life, 2);
     conway->cells = config;
 
-    brian = init_automaton(SIZE_2D, &brians_brain, 2);
-    brian->cells = config;
+    replicate = init_automaton(SIZE_2D, &replicator, 2);
+    replicate->cells = config;
+
+    wires = init_automaton(SIZE_2D, &wireworld, 2);
+    wires->cells = config;
 
     langton = init_automaton(SIZE_2D, &langtons_ant, 2);
     struct ant *ant = init_ant(100, 100, 0, -1, langton);
     langton->cells = config;
     langton->ant = ant;
+
+    automata[0] = conway;
+    automata[1] = wires;
+    automata[2] = brian;
+    automata[3] = langton;
+    automata[4] = amoeboid;
+    automata[5] = replicate;
 
     /* fps regulation */
     unsigned int frame_start;
@@ -176,7 +197,7 @@ int main(int argc, char *argv[]) {
             active = conway;
         }
     } else {
-        active = conway;
+        active = amoeboid;
     }
 
     frame_start = SDL_GetTicks();
@@ -249,6 +270,11 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+int mod(int a, int b) {
+    int r = a % b;
+    return r < 0 ? r + b : r;
+}
+
 void switch_to_automaton(struct automaton *new) {
 
     new->cells = active->cells;
@@ -305,6 +331,10 @@ int switch_to_elem(int n) {
 
 void render(struct automaton *ca) {
 
+    int r;
+    int g;
+    int b;
+
     if (ca->dimension == 1) {
 
         for (int i = 0; i < ca->len; i++) {
@@ -332,7 +362,9 @@ void render(struct automaton *ca) {
                     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
                     break;
                 case FIRING:
-                    SDL_SetRenderDrawColor(renderer, 76, 242, 4, SDL_ALPHA_OPAQUE);
+                    // SDL_SetRenderDrawColor(renderer, 76, 242, 4, SDL_ALPHA_OPAQUE);
+                    // SDL_SetRenderDrawColor(renderer, 76, 100, 200, SDL_ALPHA_OPAQUE);
+                    SDL_SetRenderDrawColor(renderer, 0, 100, 200, SDL_ALPHA_OPAQUE);
                     break;
                 case DYING:
                     SDL_SetRenderDrawColor(renderer, 229, 0, 225, SDL_ALPHA_OPAQUE);
@@ -389,6 +421,8 @@ void handle_input() {
 
     /* to calculate total size of array for memset */
     int arr_size;
+
+    int index;
 
     SDL_Event e;
 
@@ -457,6 +491,16 @@ void handle_input() {
             case SDLK_g:
                 gridlines = !gridlines;
                 break;
+            case SDLK_m:
+                index = mod(--current_ca, AUTOMATA);
+                switch_to_automaton(automata[index]);
+                print_message(index);
+                break;
+            case SDLK_n:
+                index = mod(++current_ca, AUTOMATA);
+                switch_to_automaton(automata[index]);
+                print_message(index);
+                break;
             case SDLK_p:
                 if (paused)
                     printf("Resuming...\n");
@@ -480,7 +524,7 @@ void handle_input() {
             case SDLK_1:
                 if (ctrl) {
                     switch_to_automaton(conway);
-                    printf("Welcome to the Game of Life!\n");
+                    print_message(0);
                 } else {
                     paintbrush = DEAD;
                 }
@@ -488,7 +532,7 @@ void handle_input() {
             case SDLK_2:
                 if (ctrl) {
                     switch_to_automaton(wires);
-                    printf("Welcome to WireWorld!\n");
+                    print_message(1);
                 } else {
                     paintbrush = ALIVE;
                 }
@@ -496,7 +540,7 @@ void handle_input() {
             case SDLK_3:
                 if (ctrl) {
                     switch_to_automaton(brian);
-                    printf("Welcome to Brian's Brain!\n");
+                    print_message(2);
                 } else {
                     paintbrush = HEAD;
                 }
@@ -504,7 +548,7 @@ void handle_input() {
             case SDLK_4:
                 if (ctrl) {
                     switch_to_automaton(langton);
-                    printf("Welcome to Langton's Ant!\n");
+                    print_message(3);
                 } else {
                     paintbrush = CONDUCTOR;
                 }
@@ -579,6 +623,34 @@ void handle_input() {
 
     if(keystate[SDLK_DOWN]) {
     }
+
+}
+
+void print_message(int n) {
+
+    char msg[64] = "Welcome to ";
+    switch (n) {
+    case 0:
+        strcat(msg, "Game of Life");
+        break;
+    case 1:
+        strcat(msg, "WireWorld");
+        break;
+    case 2:
+        strcat(msg, "Brian's Brain");
+        break;
+    case 3:
+        strcat(msg, "Langton's Ant");
+        break;
+    case 4:
+        strcat(msg, "Diamoeboid");
+        break;
+    case 5:
+        strcat(msg, "Replicator");
+        break;
+    }
+    strcat(msg, "!\n");
+    printf("%s", msg);
 
 }
 

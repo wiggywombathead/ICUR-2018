@@ -84,8 +84,10 @@ void rule_232(void *);
 void rule_250(void *);
 
 void brians_brain(void *);
+void diamoeba(void *);
 void game_of_life(void *);
-void wireworld(void *);
 void langtons_ant(void *);
+void replicator(void *);
+void wireworld(void *);
 
 #endif
