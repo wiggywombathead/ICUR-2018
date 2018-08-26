@@ -164,8 +164,8 @@
     Rule 90. Using this convention, we may now construct our own automata based
     solely on the knowledge of its name (at least for elementary cellular
     automata). For example, take Rule 110, introduced by Wolfram 1983
-    \cite{WolframRule110}. We first convert $110_{10}$ to binary, and then use
-    this to fill in the table as above:
+    \cite{WolframRule110}. We first convert $110_{\text{dec}}$ to binary, and
+    then use this to fill in the table as above:
 
     \begin{table}[h]
         \begin{minipage}{.5\linewidth}
@@ -466,11 +466,52 @@
     bijective. Where this is not the case, where not every configuration has a
     preimage, these configurations without preimages are called Garden of Eden
     patterns \cite{GardenOfEden}.
+
+    There are algorithms to compute whether or not a one-dimensional cellular
+    automaton is reversible \cite{oneDReversible}; the same is not true for
+    higher dimensions however, and computing reversibility for cellular automata
+    in two-dimensions and up is undecidable \cite{twoDUndecidable}.
+
     \subsubsection{Totalistic cellular automata}
-    \subsubsection{Proabilistic cellular automata}
+    A cellular automaton is totalistic if the value of cell $a$ at time $t$
+    depends on the sum of the values of the cells in its neighbourhood at time
+    $t-1$, with the values of cells being taken from some finite set
+    \cite{totalistic}. An automaton is outer totalistic if it takes into account
+    itself as well as the total of its neighbours at time $t-1$; Conway's Game
+    of Life is an example of an outer totalistic cellular automaton where all
+    cell values are 0 or 1, as are all other Life-like automata.
+
+    \subsubsection{Probabilistic cellular automata}
     \subsubsection{Cyclic cellular automata}
 
 \section{Computational Universality}
+    A system of rules, be they from a computer's instruction set, programming
+    language, or cellular automaton, is called computationally universal, or
+    Turing-complete, if it can be used to simulate a Turing machine.
+
+    \subsection{Turing Machines}
+    A Turing machine is a mathematical model of computation which was first
+    proposed by Alan Turing in 1936 \cite{SipserToC}. It consists of a infinite
+    tape divided into cells each of which may contain one character from some
+    finite alphabet, and a printer head capable of reading from and writing to the
+    tape on the cell at which it is currently positioned. In a more formal
+    sense, it is the seven-tuple $M=(Q, \Sigma, \Gamma, \delta, q_0,
+    q_{\text{accept}}, q_{\text{reject}})$, where $Q, \Sigma, \Gamma$ are all
+    finite sets and
+
+    \begin{itemize}
+        \item $Q$ is the set of states
+        \item $\Sigma$ is the input alphabet not containing the blank symbol,
+            $\textvisiblespace$
+        \item $\Gamma$ is the tape alphabet where $\textvisiblespace \in \Gamma$
+            and $\Sigma \subseteq \Gamma$
+        \item $\delta: Q \times \Gamma \rightarrow Q \times \Gamma \times
+            \{L,R\}$ is the transition function
+        \item $q_0 \in Q$ is the start state
+        \item $q_{\text{accept}} \in Q$ is the accept state, and
+        \item $q_{\text{reject}} \in Q$ is the reject state, with
+            $q_{\text{accept}} \neq q_{\text{reject}}$
+    \end{itemize}
 
 \section{Examples}
     \subsection{Von Neumann's automaton}

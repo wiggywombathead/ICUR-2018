@@ -45,10 +45,14 @@ struct automaton *rule232;
 struct automaton *rule250;
 
 struct automaton *amoeboid;
+struct automaton *annealer;
 struct automaton *brian;
 struct automaton *conway;
 struct automaton *langton;
+struct automaton *lwodeath;
+struct automaton *morley;
 struct automaton *replicate;
+struct automaton *twotwo;
 struct automaton *wires;
 
 struct automaton *automata[6];
@@ -157,14 +161,26 @@ int main(int argc, char *argv[]) {
     amoeboid = init_automaton(SIZE_2D, &diamoeba, 2);
     amoeboid->cells = config;
 
+    annealer = init_automaton(SIZE_2D, &anneal, 2);
+    annealer->cells = config;
+
     brian = init_automaton(SIZE_2D, &brians_brain, 2);
     brian->cells = config;
 
     conway = init_automaton(SIZE_2D, &game_of_life, 2);
     conway->cells = config;
 
+    lwodeath = init_automaton(SIZE_2D, &life_wo_death, 2);
+    lwodeath->cells = config;
+
+    morley = init_automaton(SIZE_2D, &move, 2);
+    morley->cells = config;
+
     replicate = init_automaton(SIZE_2D, &replicator, 2);
     replicate->cells = config;
+
+    twotwo = init_automaton(SIZE_2D, &two_by_two, 2);
+    twotwo->cells = config;
 
     wires = init_automaton(SIZE_2D, &wireworld, 2);
     wires->cells = config;
@@ -190,15 +206,7 @@ int main(int argc, char *argv[]) {
     int ticks = 0;
 
     /* main program execution */
-    if (argc == 2) {
-        if (atoi(argv[1]) == 1) {
-            active = rule30;
-        } else {
-            active = conway;
-        }
-    } else {
-        active = amoeboid;
-    }
+    active = morley;
 
     frame_start = SDL_GetTicks();
 

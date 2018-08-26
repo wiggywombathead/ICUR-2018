@@ -83,11 +83,15 @@ void rule_182(void *);
 void rule_232(void *);
 void rule_250(void *);
 
+void anneal(void *);
 void brians_brain(void *);
 void diamoeba(void *);
 void game_of_life(void *);
+void move(void *);
 void langtons_ant(void *);
+void life_wo_death(void *);
 void replicator(void *);
+void two_by_two(void *);
 void wireworld(void *);
 
 #endif
