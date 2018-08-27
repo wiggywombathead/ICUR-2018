@@ -10,7 +10,7 @@
 #include "global.h"
 #include "automaton.h"
 
-#define AUTOMATA 6
+#define AUTOMATA 10
 #define max(a,b) ((a) >= (b) ? a : b)
 
 /* milliseconds for each frame to take */
@@ -55,7 +55,7 @@ struct automaton *replicate;
 struct automaton *twotwo;
 struct automaton *wires;
 
-struct automaton *automata[6];
+struct automaton *automata[10];
 int current_ca = 0;
 
 struct automaton *active;
@@ -196,6 +196,10 @@ int main(int argc, char *argv[]) {
     automata[3] = langton;
     automata[4] = amoeboid;
     automata[5] = replicate;
+    automata[6] = morley;
+    automata[7] = lwodeath;
+    automata[8] = twotwo;
+    automata[9] = annealer;
 
     /* fps regulation */
     unsigned int frame_start;
@@ -206,7 +210,7 @@ int main(int argc, char *argv[]) {
     int ticks = 0;
 
     /* main program execution */
-    active = morley;
+    active = automata[0];
 
     frame_start = SDL_GetTicks();
 
@@ -655,6 +659,18 @@ void print_message(int n) {
         break;
     case 5:
         strcat(msg, "Replicator");
+        break;
+    case 6:
+        strcat(msg, "Morley's automaton");
+        break;
+    case 7:
+        strcat(msg, "Life without Death");
+        break;
+    case 8:
+        strcat(msg, "Two By Two");
+        break;
+    case 9:
+        strcat(msg, "Anneal");
         break;
     }
     strcat(msg, "!\n");
