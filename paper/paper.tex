@@ -8,6 +8,27 @@
 \usepackage{amsmath}
 \usepackage{url}
 \usepackage{diagbox}
+\usepackage{enumitem}
+\usepackage{braket}
+
+\usepackage{tikz}
+\usetikzlibrary{chains} % TM tape
+\usetikzlibrary{automata,positioning}   % automaton diagram
+
+\newenvironment{turing}[2]{
+    \begin{enumerate}[leftmargin=0pt,labelsep=0pt,align=left,parsep=0pt]
+        \item[$#1={}$]``\ignorespaces#2
+            \begin{enumerate}[
+                nosep,
+                align=left,
+                labelwidth=1.5em,
+                label=\bfseries\arabic{*}.,
+                ref=\arabic{*}
+            ]}{\unskip''
+            \end{enumerate}
+    \end{enumerate}}
+
+\newcommand{\bitem}{\item\hspace*{1em}\ignorespaces}
 
 \title{Cellular Automata and Computational Universality}
 
@@ -129,7 +150,8 @@
     in Fig. \ref{fig:self-organisation} below: one can clearly see the emergence
     of similar triangular structures in the cone snail's shell, appearing from a
     chaotic background. This starting chaos is modelled in the cellular
-    automaton by randomly assigning each cell a value of 0 or 1.
+    automaton by randomly assigning each cell a value of 0 or 1, with each
+    occurring with probability one half.
 
     \begin{figure}[h]%
         \centering
@@ -160,8 +182,8 @@
     \end{table}
 
     Reading the bottom row of this transition table, we get the binary number
-    $01011010_{\text{bin}} = 90_{\text{dec}}$, allowing us to name this rule set
-    Rule 90. Using this convention, we may now construct our own automata based
+    $01011010_{\text{bin}} = 90_{\text{dec}}$, and so we name this rule set Rule
+    90. Using this convention, we may now construct our own automata based
     solely on the knowledge of its name (at least for elementary cellular
     automata). For example, take Rule 110, introduced by Wolfram 1983
     \cite{WolframRule110}. We first convert $110_{\text{dec}}$ to binary, and
@@ -242,7 +264,7 @@
     
     Two technically different automata may give rise to similar patterns, and
     indeed many automata are equivalent to each other thanks to simple
-    transformations of theirunerlying geometry. The first of these
+    transformations of their underlying geometry. The first of these
     transformations is reflection in the vertical axis; the result of applying
     this is known as the mirror rule \cite{elementary}. For example, take Rule
     30. Each time some neighbourhood produces a live cell in Rule 30, let's take
@@ -263,7 +285,7 @@
 
     The first line of the table shows the ruleset for Rule 30, while the line
     below gives that of our new ruleset, made by applying the mirror rule to
-    Rule 30. Thus we get Rule 30's mirror rule Rule $01010110_{\text{bin}}$ =
+    Rule 30. Thus we get Rule 30's mirror rule, Rule $01010110_{\text{bin}}$ =
     Rule $86_{\text{dec}}$. Rules which generate the same ruleset under
     mirroring are called amphichiral, and of the 256 elementary cellular
     automata, 64 are so.
@@ -329,7 +351,7 @@
     the Moore neighbourhood and the von Neumann neighbourhood
     \cite{neighbourhoods}. The former includes the 8 cells directly surrounding
     the current cell being considered, while the latter only focuses on the four
-    orthogonally ajacent cells. Ocassionally, one may use the extended von
+    orthogonally ajacent cells. Occasionally, one may use the extended von
     Neumann neighbourhood, for which the next four closest orthogonally adjacent
     cells are also included.
 
@@ -355,11 +377,10 @@
     capable of recreating itself \cite{GameOfLife}. Von Neumann was able to
     achieve this goal using a complex automaton, with 29 states and complicated
     rules to do so \cite{VonNeumannCA}. Von Neumann's automaton is discussed in
-    more depth later. Conway's Game of Life was thus his way of simplifying von
-    Neumann's ideas, and in fact, the Game of Life is able to simulate the Game
-    of Life itself and is capable of universal computation.
-
-    The rules for Game of Life are as follows:
+    more depth later. The Game of Life was thus Conway's way of simplifying von
+    Neumann's ideas; in fact, not only can the Game of Life simulate the Game of
+    Life, it is also capable of universal computation, a topic discussed more
+    in-depth later. The rules for Game of Life are as follows:
 
     \begin{itemize}
         \item If the current cell $a_{i,j}^t$ is dead, then:
@@ -399,6 +420,14 @@
             intervals. Unline guns, puffers, and rakes, who each have a linear
             growth rate, breeders exhibit exponential growth rate
     \end{itemize}
+
+    On 6\textsuperscript{th} March, 2018 the first knightship was discovered by
+    Adam P. Goucher, named Sir Robin \cite{Knightship}. A knightship is a
+    spaceship which moves two squares horizontally for every square it moves
+    vertically, as opposed to regular spaceships, which move only vertically or
+    horizontally, or gliders, which move exactly diagonally. Sir Robin became
+    the first new spaceship movement pattern for an elementary spaceship to be
+    discovered in forty eight years \cite{fortyeight}.
 
     Conway originally believed that no pattern could grow infinitely, i.e. for
     the population to grow past any upper limit for some initial configuration
@@ -445,12 +474,8 @@
             \begin{tabular}{cc}
                 \includegraphics[width=2in]{replicator1.png} &
                 \includegraphics[width=2in]{replicator2.png} \\
-                %(a) first & (b) second \\[6pt]
                 \includegraphics[width=2in]{replicator3.png} &
                 \includegraphics[width=2in]{replicator4.png} \\
-                %(c) third & (d) fourth \\[6pt]
-                %\multicolumn{2}{c}{\includegraphics[width=65mm]{it} }\\
-                %\multicolumn{2}{c}{(e) fifth}
             \end{tabular}
             \caption{Replicator (B1357/S1357) replicating itself over the course of
             56 generations}
@@ -487,7 +512,10 @@
 \section{Computational Universality}
     A system of rules, be they from a computer's instruction set, programming
     language, or cellular automaton, is called computationally universal, or
-    Turing-complete, if it can be used to simulate a Turing machine.
+    Turing-complete, if it can be used to simulate a Turing machine. Before
+    getting into the computational universality of cellular automata, we need to
+    discuss the concept of Turing machines and what it means for a function to
+    be computable.
 
     \subsection{Turing Machines}
     A Turing machine is a mathematical model of computation which was first
@@ -502,16 +530,159 @@
     \begin{itemize}
         \item $Q$ is the set of states
         \item $\Sigma$ is the input alphabet not containing the blank symbol,
-            $\textvisiblespace$
-        \item $\Gamma$ is the tape alphabet where $\textvisiblespace \in \Gamma$
+            $\sqcup$
+        \item $\Gamma$ is the tape alphabet, where $\sqcup \in \Gamma$
             and $\Sigma \subseteq \Gamma$
         \item $\delta: Q \times \Gamma \rightarrow Q \times \Gamma \times
-            \{L,R\}$ is the transition function
+            \{L,R,S\}$ is the transition function, signifying whether the tape
+            head should move left, right, or stay in place, respectively
         \item $q_0 \in Q$ is the start state
         \item $q_{\text{accept}} \in Q$ is the accept state, and
         \item $q_{\text{reject}} \in Q$ is the reject state, with
             $q_{\text{accept}} \neq q_{\text{reject}}$
     \end{itemize}
+
+    It is conventional to use $\vdash$ to signify the start of the input string,
+    and an infinite string of $\sqcup$ to show the end of the input string. For
+    example, the string 01011010 we would expect to be represented on the tape
+    as:
+    
+    \begin{center}
+        \begin{tikzpicture}
+            \edef\sizetape{0.7cm}
+            \tikzstyle{tmtape}=[draw,minimum size=\sizetape]
+            \tikzstyle{tmhead}=[arrow box,draw,minimum size=.5cm,arrow box
+            arrows={east:.25cm, west:0.25cm}]
+
+            \begin{scope}[start chain=1 going right,node distance=-0.15mm]
+                \node [on chain=1,tmtape,draw=none] {$\ldots$};
+                \node [on chain=1,tmtape] {$\vdash$};
+                \node [on chain=1,tmtape] {0};
+                \node [on chain=1,tmtape] {1};
+                \node [on chain=1,tmtape] {0};
+                \node [on chain=1,tmtape] {1};
+                \node [on chain=1,tmtape] {1};
+                \node [on chain=1,tmtape] {0};
+                \node [on chain=1,tmtape] {1};
+                \node [on chain=1,tmtape] {0};
+                \node [on chain=1,tmtape] {$\sqcup$};
+                \node [on chain=1,tmtape] {$\sqcup$};
+                \node [on chain=1,tmtape] {$\sqcup$};
+                \node [on chain=1,tmtape,draw=none] {$\ldots$};
+            \end{scope}
+        \end{tikzpicture}
+    \end{center}
+
+    We call a set of strings Turing-recognisable \cite{Recognisable} if we can
+    construct some Turing machine to recognise it, that is, every input we feed
+    it that is in the language will cause the Turing machine to eventually move
+    to the accept state. Notice, however, that while there are two
+    ``destination'' states, $q_{\text{accept}}$ and $q_{\text{reject}}$, there
+    is a third possible outcome: that our machine does not halt, but instead
+    loops somewhere in its proceedings infinitely. Thus we call a set of strings
+    decidable if our Turing machine always halts for its inputs, that is, for
+    any input we feed it we are guaranteed to land in either $q_{\text{accept}}$
+    or $q_{\text{reject}}$.
+
+    As an example of a Turing machine in action, suppose we want to construct a
+    one to accept the language $L = \{w\#w | w \in \{0,1\}\ast\}$.  This is not
+    Context Free \cite{nonCFL}, hinting at the power behind Turing Machines with
+    regard to computability. We construct the machine informally as follows:
+
+    \begin{turing}{M}{on input $w$:}
+        \item Find a decomposition of $w$ into $w_1 \# w_2$
+        \item Start at the first symbol of $w_1$, replace the symbol with a
+            cross, and skip forward to the first symbol of $w_2$.
+            \bitem if this symbol is the same as the one you just crossed off,
+            cross it off and rewind to the symbol on the right of the first
+            symbol of $w_1$
+            \bitem else reject
+        \item Repeat this process, each time skipping forward and rewinding so
+            that you are inspecting the first symbol to the right of a cross
+            each time
+        \item If you end up inspecting a cell with the symbol $\#$, and the
+            symbols either side of it are crosses, accept
+    \end{turing}
+
+    The final thing to cover in order to understand how cellular automata such
+    as the Game of Life can be used to simulate a Turing Machine is the concept
+    of a Universal Turing Machine. A Universal Turing Machine is one which
+    recognises the language
+
+    $$A_{TM} = \{\braket{M,w} | M \text{ is a Turing Machine and } M
+    \text{ accepts } w\} $$
+
+    The $\braket{M,w}$ notation is used to denote the encoding of the Turing
+    Machine $M$ and its input $w$ in a way that some Turing Machine would be
+    able to understand and use as input. In essence, Universal Turing Machines
+    are those which are capable of simulating any other Turing Machine just from
+    its description and an input, and it is from this angle that we will look at
+    the universality of certain cellular automata.
+
+    \begin{figure}
+        \centering
+        \begin{tikzpicture}[
+                ->,
+                node distance=3cm,
+                on grid,
+                auto]
+            \node[state,initial]    (q1) []                     {$q_1$};
+            \node[state]            (q2) [above right of=q1]    {$q_2$};
+            \node[state]            (q3) [right of=q2]          {$q_3$};
+            \node[state]            (q4) [below right of=q1]    {$q_4$};
+            \node[state]            (q5) [right of=q4]          {$q_5$};
+            \node[state]            (q6) [above right of=q5]    {$q_6$};
+            \node[state]            (q7) [right of=q6]          {$q_7$};
+            \node[state,accepting]  (qa) [right of=q7]          {$q_a$};
+            \node[state,accepting]  (qr1) [right of=q3]         {$q_r$};
+            \node[state,accepting]  (qr2) [right of=q5]         {$q_r$};
+
+            \path[->]
+            (q1)
+            edge [loop above] node [align=center] {\tiny$\vdash \rightarrow R$
+            \\ \tiny$\times \rightarrow R$} ()
+            edge  node  [swap] {\tiny$0 \rightarrow \times, R$} (q2)
+            edge  node  {\tiny$1 \rightarrow \times, R$} (q4)
+            (q2)
+            edge [loop above] node [align=center] {\tiny$0 \rightarrow R$ \\
+            \tiny$1 \rightarrow R$} ()
+            edge node {\tiny$\# \rightarrow R$} (q3)
+            (q3)
+            edge [loop above] node {\tiny$\times \rightarrow R$} ()
+            edge node [swap] {\tiny$0 \rightarrow \times, L$} (q6)
+            edge node {\tiny$1 \rightarrow \times, S$} (qr1)
+            (q4)
+            edge [loop below] node [align=center] {\tiny$0 \rightarrow R$ \\
+            \tiny$1 \rightarrow R$} ()
+            edge node {\tiny$\# \rightarrow R$} (q5)
+            (q5)
+            edge [loop below] node {\tiny$\times \rightarrow R$} ()
+            edge node {\tiny$0 \rightarrow \times, S$} (qr2)
+            edge node {\tiny$1 \rightarrow \times, L$} (q6)
+            (q6)
+            edge [loop above] node [align=center] {\tiny$0 \rightarrow L$ \\
+            \tiny$1 \rightarrow L$} ()
+            edge [loop below] node [align=center] {\tiny$\times \rightarrow L$} ()
+            edge [bend left] node {\tiny$\# \rightarrow L$} (q7)
+            edge node [swap] {\tiny$\vdash \rightarrow R$} (q1)
+            (q7)
+            edge [bend left] node [align=center] {\tiny$0 \rightarrow L$ \\
+            \tiny$1 \rightarrow L$} (q6)
+            edge node {\tiny$\times \rightarrow S$} (qa);
+        \end{tikzpicture}
+        \caption{A possible Turing Machine to recognise $L$}
+        \label{TM:L}
+    \end{figure}
+
+    \subsection{Computability and Universality of Cellular Automata}
+    A Turing Machine may compute a function by starting with the input to the
+    function on the tape and halting with the output of the function on the
+    tape. A function $f : \Sigma \ast \rightarrow \Sigma \ast$ is computable if
+    some Turing Machine $M$ halts, for every input $w$, with just the result
+    $f(w)$ on the tape \cite{Computable}. Thus, any model we can devise which
+    could simulate the run of a Turing Machine on some input would be capable of
+    computing all the functions that the Turing Machine could, and hence such a
+    model would be Turing complete.
 
 \section{Examples}
     \subsection{Von Neumann's automaton}
