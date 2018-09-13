@@ -586,8 +586,9 @@
 
     As an example of a Turing machine in action, suppose we want to construct a
     one to accept the language $L = \{w\#w | w \in \{0,1\}\ast\}$.  This is not
-    Context Free \cite{nonCFL}, hinting at the power behind Turing Machines with
-    regard to computability. We construct the machine informally as follows:
+    Context Free \cite{nonCFL}, meaning Turing Machines are at least more
+    powerful than Push Down Automata. We construct the machine informally as
+    follows:
 
     \begin{turing}{M}{on input $w$:}
         \item Find a decomposition of $w$ into $w_1 \# w_2$
@@ -617,7 +618,22 @@
     able to understand and use as input. In essence, Universal Turing Machines
     are those which are capable of simulating any other Turing Machine just from
     its description and an input, and it is from this angle that we will look at
-    the universality of certain cellular automata.
+    the universality of certain cellular automata. In case this seems like a bit
+    of a leap, we can simply describe the Universal Turing Machine $U$ as
+    follows:
+
+    \begin{turing}{U}{on input $\braket{M,w}$, where $M$ is a Turing Machine and
+        $w$ is a string:}
+        \item Run $M$ on input $w$
+        \item If $M$ ever enters its accept state, accept; if $M$ ever enters
+            its reject state, reject
+    \end{turing}
+
+    Note that $U$ will never halt if $M$ never halts, and so while it recognises
+    the language $A_{TM}$, it does not decide it. In fact, $A_{TM}$ is called
+    the Halting Problem and is undecidable: there is no way for an algorithm to
+    determine whether some Turing Machine $M$ may or may not halt on input $w$,
+    without simulating it itself.
 
     \begin{figure}
         \centering
@@ -639,42 +655,42 @@
 
             \path[->]
             (q1)
-            edge [loop above] node [align=center] {\tiny$\vdash \rightarrow R$
-            \\ \tiny$\times \rightarrow R$} ()
-            edge  node  [swap] {\tiny$0 \rightarrow \times, R$} (q2)
-            edge  node  {\tiny$1 \rightarrow \times, R$} (q4)
+                edge [loop above] node [align=center] {\tiny$\vdash
+                    \rightarrow R$ \\ \tiny$\times \rightarrow R$} ()
+                edge  node  [swap] {\tiny$0 \rightarrow \times, R$} (q2)
+                edge  node  {\tiny$1 \rightarrow \times, R$} (q4)
             (q2)
-            edge [loop above] node [align=center] {\tiny$0 \rightarrow R$ \\
-            \tiny$1 \rightarrow R$} ()
-            edge node {\tiny$\# \rightarrow R$} (q3)
+                edge [loop above] node [align=center] {\tiny$0 \rightarrow R$ \\
+                    \tiny$1 \rightarrow R$} ()
+                edge node {\tiny$\# \rightarrow R$} (q3)
             (q3)
-            edge [loop above] node {\tiny$\times \rightarrow R$} ()
-            edge node [swap] {\tiny$0 \rightarrow \times, L$} (q6)
-            edge node {\tiny$1 \rightarrow \times, S$} (qr1)
+                edge [loop above] node {\tiny$\times \rightarrow R$} ()
+                edge node [swap] {\tiny$0 \rightarrow \times, L$} (q6)
+                edge node {\tiny$1 \rightarrow \times, S$} (qr1)
             (q4)
-            edge [loop below] node [align=center] {\tiny$0 \rightarrow R$ \\
-            \tiny$1 \rightarrow R$} ()
-            edge node {\tiny$\# \rightarrow R$} (q5)
+                edge [loop below] node [align=center] {\tiny$0 \rightarrow R$ \\
+                    \tiny$1 \rightarrow R$} ()
+                edge node {\tiny$\# \rightarrow R$} (q5)
             (q5)
-            edge [loop below] node {\tiny$\times \rightarrow R$} ()
-            edge node {\tiny$0 \rightarrow \times, S$} (qr2)
-            edge node {\tiny$1 \rightarrow \times, L$} (q6)
+                edge [loop below] node {\tiny$\times \rightarrow R$} ()
+                edge node {\tiny$0 \rightarrow \times, S$} (qr2)
+                edge node {\tiny$1 \rightarrow \times, L$} (q6)
             (q6)
-            edge [loop above] node [align=center] {\tiny$0 \rightarrow L$ \\
-            \tiny$1 \rightarrow L$} ()
-            edge [loop below] node [align=center] {\tiny$\times \rightarrow L$} ()
-            edge [bend left] node {\tiny$\# \rightarrow L$} (q7)
-            edge node [swap] {\tiny$\vdash \rightarrow R$} (q1)
+                edge [loop above] node [align=center] {\tiny$0 \rightarrow L$ \\
+                    \tiny$1 \rightarrow L$} ()
+                edge [loop below] node [align=center] {\tiny$\times \rightarrow L$} ()
+                edge [bend left] node {\tiny$\# \rightarrow L$} (q7)
+                edge node [swap] {\tiny$\vdash \rightarrow R$} (q1)
             (q7)
-            edge [bend left] node [align=center] {\tiny$0 \rightarrow L$ \\
-            \tiny$1 \rightarrow L$} (q6)
-            edge node {\tiny$\times \rightarrow S$} (qa);
+                edge [bend left] node [align=center] {\tiny$0 \rightarrow L$ \\
+                    \tiny$1 \rightarrow L$} (q6)
+                edge node {\tiny$\times \rightarrow S$} (qa);
         \end{tikzpicture}
         \caption{A possible Turing Machine to recognise $L$}
         \label{TM:L}
     \end{figure}
 
-    \subsection{Computability and Universality of Cellular Automata}
+    \subsection{Universality of Game of Life}
     A Turing Machine may compute a function by starting with the input to the
     function on the tape and halting with the output of the function on the
     tape. A function $f : \Sigma \ast \rightarrow \Sigma \ast$ is computable if
@@ -684,12 +700,35 @@
     computing all the functions that the Turing Machine could, and hence such a
     model would be Turing complete.
 
-\section{Examples}
+    The key to Game of Life's universal computation is its ability to create
+    infinite growth, for example by using glider guns. Guns can then be
+    positioned to shoot at blocks in specific locations, and doing so correctly
+    can be used to move the block closer or further away. This sliding block
+    memory can be used to simulate a counter \cite{Counter}. Logical AND, OR,
+    and NOT gates can also be constructed using gliders, with the presence of a
+    glider signifying a 1, and 0 otherwise. These three Boolean operators are
+    theoretically necessary and sufficient to build a Universal Turing Machine
+    \cite{BoolTM}. A fully functioning Turing Machine was designed to completion
+    by Paul Rendell on 2\textsuperscript{nd} April, 2000 \cite{golTM}, which
+    doubled the number on the input tape. Further extensions led to the
+    development of Universal Turing Machines in February 2010 and March 2011,
+    both of which were capable of simulating the Turing Machine from 2000
+    \cite{golUTM1,golUTM2}.
+
+    \begin{figure}[h]
+        \includegraphics{}
+        \caption{}
+        \label{}
+    \end{figure}
+
+\section{More cellular automata}
+    \subsection{WireWorld}
+    \subsubsection{Computational Universality}
+    \subsection{Rule 110}
+    \subsubsection{Computational Universality}
     \subsection{Von Neumann's automaton}
-    \subsection{Game of Life}
     \subsection{Fractran}
     \subsection{Langton's Ant}
-    \subsection{WireWorld}
 \section{Applications}
     \subsection{Cryptography}
 \section{Firing Squad Synchronisation Problem}
