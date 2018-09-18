@@ -3,7 +3,10 @@
 \bibliographystyle{ieeetr}
 
 \usepackage[margin=1in]{geometry}
+
 \usepackage{graphicx}
+\graphicspath{{figs/}}
+
 \usepackage{subfig}
 \usepackage{amsmath}
 \usepackage{url}
@@ -690,15 +693,28 @@
         \label{TM:L}
     \end{figure}
 
-    \subsection{Universality of Game of Life}
+    \subsection{Universality in the Conway's Game of Life}
     A Turing Machine may compute a function by starting with the input to the
     function on the tape and halting with the output of the function on the
     tape. A function $f : \Sigma \ast \rightarrow \Sigma \ast$ is computable if
     some Turing Machine $M$ halts, for every input $w$, with just the result
-    $f(w)$ on the tape \cite{Computable}. Thus, any model we can devise which
-    could simulate the run of a Turing Machine on some input would be capable of
-    computing all the functions that the Turing Machine could, and hence such a
-    model would be Turing complete.
+    $f(w)$ on the tape \cite{Computable}. So for each computable function, there
+    is a Turing Machine $T$ such that running $T$ on input $x$ always halts and
+    outputs the correct answer (i.e., ends with the correct answer on the tape).
+    Thus, any model we can devise which could simulate the run of a Turing
+    Machine on some input would be capable of computing all the functions that
+    the Turing Machine could, that is, all computable functions, and hence such
+    a model would be Turing complete.
+
+    Processor instruction sets may be fully implemented using just a NOT gate
+    and one of either AND or OR in order to compute all binary logic. All that
+    remains to obtain Turing Completeness is access to infinite, random access
+    memory. Of course, given the finite nature of computers, this is impossible,
+    but as long as the memory is as large as is required by the Turing Machine,
+    this will suffice. Memory can be implemented in logic circuits using D-type
+    flip flops, which can be done with four NAND gates. Thus, if this can be
+    implemented using a cellular automaton, that automaton will be a universal
+    computer.
 
     The key to Game of Life's universal computation is its ability to create
     infinite growth, for example by using glider guns. Guns can then be
@@ -715,23 +731,143 @@
     both of which were capable of simulating the Turing Machine from 2000
     \cite{golUTM1,golUTM2}.
 
-    %\begin{figure}[h]
-    %    \includegraphics{}
-    %    \caption{}
-    %    \label{}
-    %\end{figure}
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=5in]{golTM.png}
+        \caption{Section of a Turing Machine implemented in Conway's Game of
+        Life}
+        \label{fig:golTM}
+    \end{figure}
 
 \section{More cellular automata}
     \subsection{WireWorld}
+    WireWorld is a two-dimensional cellular automaton first proposed by Brian
+    Silverman in 1987. The ruleset is relatively simpleset, with four distinct
+    states:
+    \begin{enumerate}
+        \item empty
+        \item conductor
+        \item electron head
+        \item electron tail
+    \end{enumerate}
+
+    As the state names may betray, WireWorld is particularly good at simulating
+    electronics. Like Game of Life, WireWorld uses a Moore neighbourhoodin its
+    calculations, as opposed to the more restricted Von Neumann
+    neighbourhood.The rules are as follows:
+    \begin{itemize}
+        \item $empty \rightarrow empty$
+        \item $head \rightarrow tail$
+        \item $tail \rightarrow conductor$
+        \item $conductor \rightarrow head \text{ if exactly 2 neighbours are
+            $head$, else } conductor$
+    \end{itemize}
+
+    \begin{figure}[h]%
+        \centering \subfloat[OR and XOR gates]{{\includegraphics[width=2in]{wireworld_gates.png}}}%
+        \qquad
+        \subfloat[D-type flip flop]{{\includegraphics[width=2in]{wireworld_flipflop.png}}}%
+        \caption{All the structures required for universal computation implemented in WireWorld}%
+        \label{fig:nature_fractals}%
+    \end{figure}
+
     \subsubsection{Computational Universality}
+    As with Game of Life, WireWorld can be used to implement the logic gates
+    required for Turing Completeness, and is inherently more suited to doing so.
+    A full computer has been constructed in WireWorld, which calculates prime
+    numbers \cite{WW_TM}. Langton's Ant, a cellular automaton that will be
+    discussed shortly, has also been implemented in WireWorld \cite{WW_LA}.
+
     \subsection{Rule 110}
     \subsubsection{Computational Universality}
+    The key to Rule 110's computational universality is its ability to simulate
+    a ``tag system'', which is universal, using gliders inherent to the
+    automaton \cite{Rule110_universal}. The details are somewhat beyond the
+    scope and level of this report, but Cook first proves that a tag system that
+    removes two symbols at each stage is universal by compiling a two-state
+    Turing Machine program. After this, he shows that such a tag system may be
+    implemented using these gliders in Rule 110, and consequently shows that
+    this cellular automaton is capable of universal computation. Some such
+    gliders used by Cook in his proof of Rule 110's universality are shown in
+    Fig. \ref{fig:110_gliders}.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=4in]{rule110_gliders.png}
+        \caption{Gliders that interact by a) translation and b) forming a new
+        structure}
+        \label{fig:110_gliders}
+    \end{figure}
+
+    Due to Rule 110's simplicity, it suggests naturally occurring physical
+    systems may also be capable of universality (systems similar to the way the
+    shapes formed on the cone snail's shell, for example). Therefore, many of
+    the properties of such systems would be undecidable, for which it is
+    impossible to find closed-form mathematical solutions.
+
     \subsection{Von Neumann's automaton}
+    Cellular automata can trace their roots back to the work done in the late
+    1940s by Stanislaw Ulam and John von Neumann. Von Neumann wanted to
+    ultimately answer the question of whether a machine was capable of
+    replicating itself. We are used to automata creating structures much simpler
+    than themselves, for example a factory that produces bolts: presumably, one
+    section of the machine would cast the metal, while another would make the
+    thread. He was concerned whether there was some form of ``extra-mechanical
+    magic'' to self-reproduction \cite{CA_origins}.
+
+    By 1952, von Neumann had completed his goal of engineering an automaton
+    capable of recreating itself. It used a total of 29 states, and each cell's
+    state in the next generation is calculated by considering its von Neumann
+    neighbourhood in the current one. A summary of the states is as follows:
+
+    \begin{enumerate}
+        \item one ground state, $U$
+        \item eight transition states,
+            $S,S_0,S_{00},S_{000},S_{01},S_1,S_{10},S_{11}$
+        \item four confluent states, $C_{00}, C_{01}, C_{10}, C{11}$
+        \item eight ordinary transmission states in directions North, East,
+            South, and West
+            \begin{itemize}
+                \item North-quiescent, North-excited
+                \item East-quiescent, East-excited
+                \item South-quiescent, South-excited
+                \item West-quiescent, West-excited
+            \end{itemize}
+        \item eight special transmission states in the same directions
+            \begin{itemize}
+                \item North-quiescent, North-excited
+                \item East-quiescent, East-excited
+                \item South-quiescent, South-excited
+                \item West-quiescent, West-excited
+            \end{itemize}
+    \end{enumerate}
+
+    The ruleset can be broken down into four sections, concerning those for
+    construction, destruction, transmission states, and confluent states. They
+    are extensive and a full summary can be found at \cite{VN_rules}.
+
     \subsection{Fractran}
     \subsection{Langton's Ant}
 \section{Applications}
     \subsection{Cryptography}
 \section{Firing Squad Synchronisation Problem}
+    \subsection{The Problem}
+    Imagine a group of soldiers all part of a firing squad, with a general at
+    one end. Firing squads would aim to have all of its soldiers fire at the
+    same time so that no one soldier could be sure he had delivered the fatal
+    wound to the condemned. The soldiers of the firing squad can be modelled as
+    cells in a cellular automaton, and so the Firing Squad Synchronisation
+    Problem, or FSSP, is concerned with ensuring that all states end up in a
+    ``firing'' state at some point, at the same point in time. At each time
+    step, a soldier may change what he is doing based on what him and his two
+    immediate neighbours are doing (so the two soldiers on the ends only take
+    into account their own current action and that of his single neighbour).
+    Assume all soldiers start off in the same inactive state, also called the
+    quiescent state. The question begins when the general initially gives the
+    command to fire: assuming there is a fixed number of states, regardless of
+    how many soldiers are in the line, how can the states be defined such that
+    all soldiers are in the firing state at the same time?
+
 \section{Majority Problem}
 
 \bibliography{bibliography}
