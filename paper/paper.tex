@@ -850,26 +850,153 @@
     \subsection{Langton's Ant}
 \section{Applications}
     \subsection{Cryptography}
+
 \section{Firing Squad Synchronisation Problem}
     \subsection{The Problem}
-    Imagine a group of soldiers all part of a firing squad, with a general at
-    one end. Firing squads would aim to have all of its soldiers fire at the
-    same time so that no one soldier could be sure he had delivered the fatal
-    wound to the condemned. The soldiers of the firing squad can be modelled as
-    cells in a cellular automaton, and so the Firing Squad Synchronisation
-    Problem, or FSSP, is concerned with ensuring that all states end up in a
-    ``firing'' state at some point, at the same point in time. At each time
-    step, a soldier may change what he is doing based on what him and his two
-    immediate neighbours are doing (so the two soldiers on the ends only take
-    into account their own current action and that of his single neighbour).
-    Assume all soldiers start off in the same inactive state, also called the
-    quiescent state. The question begins when the general initially gives the
-    command to fire: assuming there is a fixed number of states, regardless of
-    how many soldiers are in the line, how can the states be defined such that
-    all soldiers are in the firing state at the same time?
+    A firing squad consists of a group of soldiers, all of whom will fire a shot
+    at the condemned party in order to end his or her life, at the command of a
+    general. An important factor to this is that all the soldiers fire
+    simultaneously; this means that no one soldier can be sure that they are the
+    one to have administered the fatal shot, and can thus rest easy at night. If
+    we model the line of soldiers as a one-dimensional cellular automaton, we
+    want all of the cells in this automaton to be in a ``firing'' state
+    simultaneously.  More specifically, at each time step each soldier may
+    change what he is doing (i.e. change his state) based solely upon what he
+    and his two immediate neighbours are doing. Note that the soldiers at either
+    end of the line only consider the actions of himself and his sole neighbour.
+    Furthermore, we assume that each soldier starts in the same inactive state
+    (also known as the quiescent state), and that the general is located at one
+    end of the line, and only he may give the initial command to fire. He
+    himself must also fire his weapon at the to-be recipient of the discharge of
+    such weapons. Thus the question asked by the Firing Squad Synchronisation
+    Problem is this: assuming there is a fixed number of states, and regardless
+    of how many soldiers form the firing squad, how can the states and
+    transitions be defined such that all soldiers are all, at some moment in
+    time, firing together?
+
+    \subsection{The Solution}
+    Since the signal can only travel at most one cell to the left/right between
+    each time step, it is clear that a minimal-time solution can not take shorter
+    than $2(n-1)$ time (the signal must travel all the way down the line and all
+    the way back, on the way down skipping the general and on the way back
+    bouncing straight off the end soldier). The first minimal-time solution to
+    the problem was Abraham Waksman's, published in 1966 \cite{Waksman}. This
+    solution uses the following six basic states:
+    
+    \begin{enumerate}
+        \item $Q$ - the starting, quiescent state
+        \item $T$ - the final, firing state
+        \item $R$ - the trigger signal for the $B$ state:
+            \begin{itemize}
+                \item $R_0$ - propagates left
+                \item $R_1$ - propagates right
+            \end{itemize}
+        \item $B$ - the state that generates the $P$ state
+            \begin{itemize}
+                \item $B_0$ - blocks the $R$ state
+                \item $B_1$ - passes through the $R$
+            \end{itemize}
+        \item $P$ - the state generating the $A$ state (leads to $T$ if both
+            neighbours in $P$ state)
+            \begin{itemize}
+                \item $P_0$ - generates $A_{0xx}$
+                \item $P_1$ - generates $A_{1xx}$
+            \end{itemize}
+        \item $A$ - the propagating state
+            \begin{itemize}
+                \item $A_{000}, A_{001}, A_{010}, A_{011}, A_{100}, A_{101},
+                    A_{110}, A_{111}$
+                \item $A_{0xx}$ - generates the state $R$ with no delay
+                \item $A_{1xx}$ - generates the state $R$ with one unit time
+                    delay
+                \item $A_{x00}, A_{x01}$ - propagates to the left
+                \item $A_{x10}, A_{x11}$ - propagates to the right
+            \end{itemize}
+    \end{enumerate}
+
+    There are also two extra placeholder states:
+    \begin{itemize}
+        \item $\phi$ - external state, no neighbour to this side
+        \item $\gamma$ - neighbours note explicitly mentioned
+    \end{itemize}
+
+    The way Waksman's solution works can be summarized by the interactions
+    between the states of his automaton which occur:
+    \begin{itemize}
+        \item Every $A$ signal can be assigned a parity, even or odd, based on
+            whether it is at an even or odd cell. The parity is relative to the
+            cell who originated the signal
+        \item Every cell with an even $A$ signal generates a new $R$ signal that
+            travels in the opposite direction of the cell's $A$ signal
+        \item Each type of $B$ signal will switch to the other type upon
+            intersection with an $R$ signal. One type allows the $R$ signal to
+            continue propagating, the other does not
+        \item When $A$ and $B$ signals intersect, they set up a new generator,
+            or $P$ signal
+    \end{itemize}
+
+    Of course, time complexity is not the only metric by which to judge a
+    solution's merit. The first solution to the problem, proposed by John
+    McCarthy and Marvin Minsky, was relatively much more simple, involving
+    propagating two waves down the line of soldiers, one moving at three times
+    the speed of the other. The faster wave bounces off the edges and meet again
+    in the center, creating two more waves for a total of four waves. This
+    process repeats, until each cell is part of a wave simultaneously. At this
+    point, the soldiers fire. This requires $3n$ units of time for $n$ soldiers,
+    and requires 15 states.
+
+    The current best solution to the problem was devised by Jacques Mazoyer
+    \cite{FSSP_best}, and uses six states to solve the problem in time $2(n-1)$.
+
+    In minimal-time solutions, the general sends signals $S_1, S_2, S_3, ..., S_i$ to
+    the right (assuming he is the left most soldier) at speeds $1, \frac{1}{3},
+    \frac{1}{7}, ..., \frac{1}{2^{i-1}-1}$. $S_1$ reflects and meets signal
+    $S_i$ (for $i \ge 2$) at cell $\frac{n}{2^{i-1}}$. When $S_1$ reflects it also
+    creates another general at the right end, and the process repeats. Fig.
+    \ref{fig:mazoyer} shows Mazoyer's minimal-time and so far minimal-state
+    solution to FSSP.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=4in]{mazoyer_fssp.png}
+        \caption{Mazoyer's minimal solution to FSSP. Time increases from left to
+        right.}
+        \label{fig:mazoyer}
+    \end{figure}
 
 \section{Majority Problem}
+    \subsection{The Problem}
+    Suppose we have a one-dimensional cellular automaton, each of whose cells
+    may be in one of two states. There are $i+j$ cells in total, $i$ of which
+    are in the zero state, the other $j$ of which are in the one state. A
+    correct solution to this problem must eventually set all cells to zero if $i
+    > j$, or one if $i < j$. The desired final state of the automaton is
+    unspecified if $i = j$.
+
+    \subsection{The Solution}
+    G\'acs, Kurdyumov, and Levin designed an automaton the solves the Majority
+    Problem in most cases, but not all. In fact, with a random starting
+    configuration, their solution is about 78\% successful in correctly
+    determining the majority \cite{GKL_majority}. They approached it by
+    classifying the quality of a particular cellular automaton by the proportion
+    of the $2^{i+j}$ possible starting configurations in which it correctly
+    identified the majority.
+
+    An overview of their method is as follows: if a cell is 0, the next state is
+    the majority value between itself, its neighbour immediately to its left,
+    and its neighbour three spaces to the left. Similarly, if the cell is a 1,
+    the value is taken as the majority of itself, its immediate right neighbour,
+    and its neighbour three spaces to the right.
+
+    Capcarrere, Sipper, and Tomassini observed \cite{CST_majority} the Majority
+    Problem may be solved perfectly by altering the definition of having
+    recognised the majority. For example, if Rule 184 is run on a finite
+    universe with cyclic boundaries, each cell will eventually see two
+    consecutive states of the majority value infinitely often, but will see two
+    consecutive states of the minority value only finitely many times. Thus the
+    Majority Problem cannot be solved perfectly if we require all cells to
+    eventually stabilise to the majority state, but can if we relax this
+    requirement and allow Rule 184 to run infinitely \cite{LB_majority}.
 
 \bibliography{bibliography}
-
 \end{document}
