@@ -82,9 +82,7 @@ void rule_30(void *data) {
     new[0] = ca->cells[0] | ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }
@@ -113,13 +111,35 @@ void rule_54(void *data) {
     new[0] = ca->cells[0] ^ ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }
 
+void next_layer(struct automaton *ca) {
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y += ca->rects[i].h;
+    }
+}
+
+void reset_rects(struct automaton *ca) {
+    for (int i = 0; i < ca->len; i++) {
+        ca->rects[i].y = 0;
+    }
+}
+
+void reset_automaton(struct automaton *ca) {
+    int arr_size = pow(ca->len, ca->dimension) * sizeof(int);
+    printf("Clearing %d bytes\n", arr_size);
+    memset(
+        ca->cells,
+        DEAD,
+        arr_size
+    );
+
+    if (ca->dimension == 1)
+        reset_rects(ca);
+}
 
 /**
  * 111 110 101 100 011 010 001 000
@@ -140,9 +160,7 @@ void rule_90(void *data) {
     new[0] = ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }
@@ -171,9 +189,7 @@ void rule_110(void *data) {
     new[0] = ca->cells[1] | (ca->cells[0] ^ ca->cells[1]);
     new[ca->len-1] = ca->cells[ca->len-1];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }
@@ -225,9 +241,7 @@ void rule_182(void *data) {
     new[0] = ca->cells[0] ^ ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2] ^ ca->cells[ca->len-1];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }
@@ -252,9 +266,7 @@ void rule_232(void *data) {
     new[0] = ca->cells[0] & ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2] & ca->cells[ca->len-1];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }
@@ -274,9 +286,7 @@ void rule_250(void *data) {
     new[0] = ca->cells[1];
     new[ca->len-1] = ca->cells[ca->len-2];
 
-    for (int i = 0; i < ca->len; i++) {
-        ca->rects[i].y += ca->rects[i].h;
-    }
+    next_layer(ca);
 
     ca->cells = new;
 }

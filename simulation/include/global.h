@@ -7,7 +7,7 @@
 #define FRAME_RATE 60
 #define TXT_WIDTH 9
 
-#define SIZE_1D 800
+#define SIZE_1D 400
 #define SIZE_2D 160
 
 #endif

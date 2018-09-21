@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     /* automata initialisation */
     int *config_1d = calloc(SIZE_1D, sizeof(int));
-    config_1d[400] = 1;
+    config_1d[SIZE_1D / 2] = 1;
 
     int *config = calloc(SIZE_2D*SIZE_2D, sizeof(int));
 
@@ -210,29 +210,30 @@ int main(int argc, char *argv[]) {
     int ticks = 0;
 
     /* main program execution */
-    active = automata[0];
+    // active = automata[0];
+    active = rule30;
 
     frame_start = SDL_GetTicks();
 
     while (running) {
 
+        // sprintf(gen_str, "%d", gens);
+        // if ((gen_len = strlen(gen_str)) > last_gen_len) {
+        //     last_gen_len = gen_len;
+        //     msg_rect.w += TXT_WIDTH;
+        //     msg_rect.x -= TXT_WIDTH;
+        // }
+
+        // surface = TTF_RenderText_Solid(font, gen_str, white);
+        // texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+        /* do what it says on the tin */
         handle_input();
-
-        sprintf(gen_str, "%d", gens);
-        if ((gen_len = strlen(gen_str)) > last_gen_len) {
-            last_gen_len = gen_len;
-            msg_rect.w += TXT_WIDTH;
-            msg_rect.x -= TXT_WIDTH;
-        }
-
-        surface = TTF_RenderText_Solid(font, gen_str, white);
-        texture = SDL_CreateTextureFromSurface(renderer, surface);
 
         /* render automaton */
         render(active);
 
         if (!paused) {
-
             if (ticks > speed) {
 
                 /* update automaton */
@@ -246,7 +247,6 @@ int main(int argc, char *argv[]) {
                 ticks++;
 
             }
-
         } else {
             if (step) {
                 active->sim(active);
@@ -256,8 +256,8 @@ int main(int argc, char *argv[]) {
         }
 
         /* perhaps inefficient, but it works (TODO) */
-        SDL_DestroyTexture(texture);
-        SDL_FreeSurface(surface);
+        // SDL_DestroyTexture(texture);
+        // SDL_FreeSurface(surface);
 
         /* fix framerate at FRAME_RATE fps */
         frame_curr = SDL_GetTicks();
@@ -269,6 +269,7 @@ int main(int argc, char *argv[]) {
 
         frame_start = frame_curr;
 
+        SDL_Delay(60);
     }
 
     TTF_CloseFont(font);
@@ -332,8 +333,6 @@ int switch_to_elem(int n) {
         active->rects[i].y = 0;
     }
 
-    active->cells[SIZE_1D / 2] = 1;
-
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
 
@@ -342,10 +341,6 @@ int switch_to_elem(int n) {
 }
 
 void render(struct automaton *ca) {
-
-    int r;
-    int g;
-    int b;
 
     if (ca->dimension == 1) {
 
@@ -374,8 +369,6 @@ void render(struct automaton *ca) {
                     SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
                     break;
                 case FIRING:
-                    // SDL_SetRenderDrawColor(renderer, 76, 242, 4, SDL_ALPHA_OPAQUE);
-                    // SDL_SetRenderDrawColor(renderer, 76, 100, 200, SDL_ALPHA_OPAQUE);
                     SDL_SetRenderDrawColor(renderer, 0, 100, 200, SDL_ALPHA_OPAQUE);
                     break;
                 case DYING:
@@ -421,18 +414,16 @@ void render(struct automaton *ca) {
 }
 
 void handle_input() {
-
+    
     /* for mouse coords */
     static int x1, y1, x2, y2;
 
-    static bool mouse = false;
+    static bool l_mouse = false;
+    static bool r_mouse = false;
     static bool ctrl = false;
 
     /* keep track of which cell to modify in DRAW mode */
     int n_i, n_j;
-
-    /* to calculate total size of array for memset */
-    int arr_size;
 
     int index;
 
@@ -448,21 +439,30 @@ void handle_input() {
         case SDL_MOUSEBUTTONDOWN:
             switch (e.button.button) {
             case SDL_BUTTON_LEFT:
-                mouse = true;
+                l_mouse = true;
                 n_i = e.motion.x / active->cell_width;
-                n_j = e.motion.y / active->cell_height;
 
-                active->cells[n_j*active->len + n_i] = paintbrush;
+                if (active->dimension == 1) {
+                    active->cells[n_i] = ALIVE;
+                } else {
+                    n_j = e.motion.y / active->cell_height;
+                    active->cells[n_j*active->len + n_i] = paintbrush;
+                }
                 break;
             case SDL_BUTTON_RIGHT:
+                r_mouse = true;
                 n_i = e.motion.x / active->cell_width;
-                n_j = e.motion.y / active->cell_height;
 
-                active->cells[n_j*active->len + n_i] = DEAD;
+                if (active->dimension == 1) {
+                    active->cells[n_i] = DEAD;
+                } else {
+                    n_j = e.motion.y / active->cell_height;
+                    active->cells[n_j*active->len + n_i] = DEAD;
+                }
             }
             break;
         case SDL_MOUSEBUTTONUP:
-            mouse = false;
+            l_mouse = r_mouse = false;
             break;
         case SDL_KEYDOWN:
             switch (e.key.keysym.sym) {
@@ -483,13 +483,12 @@ void handle_input() {
                 speed++;
                 break;
             case SDLK_c:
-                arr_size = pow(active->len,active->dimension) * sizeof(int);
-                printf("Clearing %d bytes\n", arr_size);
-                memset(
-                    active->cells,
-                    DEAD,
-                    arr_size
-                );
+                reset_automaton(active);
+                if (active->dimension == 1) {
+                    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+                    SDL_RenderClear(renderer);
+                    SDL_RenderPresent(renderer);
+                }
                 gens = 0;
                 break;
             case SDLK_e:
@@ -522,9 +521,6 @@ void handle_input() {
                 break;
             case SDLK_q:
                 running = 0;
-                break;
-            case SDLK_r:
-                gens = 0;
                 break;
             case SDLK_0:
                 if (ctrl) {
@@ -613,12 +609,26 @@ void handle_input() {
 
     }
 
-    if (mouse) {
+    if (l_mouse) {
         SDL_GetMouseState(&x1, &y1);
         n_i = x1 / active->cell_width;
         n_j = y1 / active->cell_height;
 
-        active->cells[n_j*active->len + n_i] = paintbrush;
+        if (active->dimension == 1) {
+            active->cells[n_i] = ALIVE;
+        } else {
+            active->cells[n_j*active->len + n_i] = paintbrush;
+        }
+    } else if (r_mouse) {
+        SDL_GetMouseState(&x1, &y1);
+        n_i = x1 / active->cell_width;
+        n_j = y1 / active->cell_height;
+
+        if (active->dimension == 1) {
+            active->cells[n_i] = DEAD;
+        } else {
+            active->cells[n_j*active->len + n_i] = paintbrush;
+        }
     }
 
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);

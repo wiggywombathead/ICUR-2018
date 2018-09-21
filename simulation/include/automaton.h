@@ -73,6 +73,10 @@ struct automaton {
 struct automaton *init_automaton(int len, simulate_fn func, int d);
 struct ant *init_ant(int x, int y, int dx, int dy, struct automaton *);
 
+void next_layer(struct automaton *);
+void reset_rects(struct automaton *);
+void reset_automaton(struct automaton *);
+
 /* elementary cellular automata */
 void rule_30(void *);
 void rule_54(void *);
